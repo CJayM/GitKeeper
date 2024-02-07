@@ -1,4 +1,5 @@
 #include "mainwindow.h"
+#include "settings_dialog.h"
 
 #include "domain/git_file.h"
 #include "models/git_files_model.h"
@@ -19,13 +20,17 @@ MainWindow::MainWindow(QWidget *parent)
   QSettings settings("kb23", "GitKeeper");
   restoreGeometry(settings.value("geometry").toByteArray());
 
+  settingsDialog_ = new SettingsDialog(this);
+
   filesModel_ = new GitFilesModel();
   ui->filesTableView->setModel(filesModel_);
-  ui->stagedTableView->setModel(filesModel_);
+  ui->stagedTableView->setModel(filesModel_);  
 
   auto selectionModel = ui->filesTableView->selectionModel();
 
-  connect(selectionModel, &QItemSelectionModel::currentChanged, this,
+  connect(selectionModel,
+          &QItemSelectionModel::currentChanged,
+          this,
           &MainWindow::onCurrentFileChanged);
 
   connect(ui->actionStatus, &QAction::triggered, this, &MainWindow::onStatusAction);
@@ -39,9 +44,9 @@ MainWindow::MainWindow(QWidget *parent)
           &MainWindow::onGitStatusFinished);
   connect(gitRepository_, &GitRepository::sgnSended, this,
           &MainWindow::onSendedToGit);
-  connect(gitRepository_, &GitRepository::sgnReceived, this,
-          &MainWindow::onReceivedFromGit);
+  connect(gitRepository_, &GitRepository::sgnReceived, this, &MainWindow::onReceivedFromGit);
 
+  connect(ui->actionOpenSettings, &QAction::triggered, this, &MainWindow::onOpenSettingsDialog);
   gitRepository_->status();
 }
 
@@ -85,8 +90,15 @@ void MainWindow::onReceivedFromGit(QString data, bool isError) {
     ui->logMessage->append(QString("<span>%1</span>").arg(data));
 }
 
-void MainWindow::onGitStatusFinished(QVector<GitFile> files) {
-  filesModel_->setFiles(files);
+void MainWindow::onGitStatusFinished(QVector<GitFile> files)
+{
+    filesModel_->setFiles(files);
+}
+
+void MainWindow::onOpenSettingsDialog()
+{
+    settingsDialog_->setModal(true);
+    settingsDialog_->show();
 }
 
 void MainWindow::closeEvent(QCloseEvent *event) {

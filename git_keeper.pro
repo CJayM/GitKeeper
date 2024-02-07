@@ -10,17 +10,20 @@ SOURCES += \
     domain/git_repository.cpp \
     main.cpp \
     mainwindow.cpp \
-    models/git_files_model.cpp
+    models/git_files_model.cpp \
+    settings_dialog.cpp
 
 HEADERS += \
     domain/git.h \
     domain/git_file.h \
     domain/git_repository.h \
     mainwindow.h \
-    models/git_files_model.h
+    models/git_files_model.h \
+    settings_dialog.h
 
 FORMS += \
-    mainwindow.ui
+    mainwindow.ui \
+    settings_dialog.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

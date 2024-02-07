@@ -19,6 +19,8 @@ class QAction;
 class GitFilesModel;
 class GitRepository;
 
+class SettingsDialog;
+
 class MainWindow : public QMainWindow {
   Q_OBJECT
 
@@ -35,14 +37,17 @@ private slots:
   void onSendedToGit(QString data);
   void onReceivedFromGit(QString data, bool isError);
   void onGitStatusFinished(QVector<GitFile> files);
+  void onOpenSettingsDialog();
 
-private:
+  private:
   Ui::MainWindow *ui;
 
   GitFilesModel *filesModel_ = nullptr;
   GitRepository *gitRepository_ = nullptr;
 
   Git *git_ = nullptr;
+
+  SettingsDialog *settingsDialog_ = nullptr;
 
   // QWidget interface
 protected:

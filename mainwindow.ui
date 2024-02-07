@@ -298,7 +298,7 @@
     <addaction name="action_5"/>
     <addaction name="action_6"/>
     <addaction name="separator"/>
-    <addaction name="action_3"/>
+    <addaction name="actionOpenSettings"/>
     <addaction name="action_4"/>
    </widget>
    <addaction name="menu"/>
@@ -374,7 +374,7 @@
     <string>Создать</string>
    </property>
   </action>
-  <action name="action_3">
+  <action name="actionOpenSettings">
    <property name="text">
     <string>Настройки</string>
    </property>
