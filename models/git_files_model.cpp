@@ -3,13 +3,13 @@
 
 GitFilesModel::GitFilesModel() {}
 
-void GitFilesModel::setFiles(QVector<GitFile> files, bool isStaged)
+void GitFilesModel::setFiles(QVector<GitFile> files)
 {
     beginResetModel();
     files_.clear();
 
     for (const auto &file : files) {
-        if (isStaged) {
+        if (isStaged_) {
             if (file.indexState >= FileState::MODIFIED)
                 files_ << file;
         } else {
@@ -49,6 +49,11 @@ QVariant GitFilesModel::data(const QModelIndex &index, int role) const {
     return index.column();
   }
   return {};
+}
+
+void GitFilesModel::setIsStaged(bool isStaged)
+{
+    isStaged_ = isStaged;
 }
 
 QVariant GitFilesModel::headerData(int section, Qt::Orientation orientation,

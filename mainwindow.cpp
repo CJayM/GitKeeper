@@ -25,8 +25,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     connect(settingsDialog_, &QDialog::accepted, this, &MainWindow::onSaveSettings);
 
     filesModel_ = new GitFilesModel();
-    stagedModel_ = new GitFilesModel();
     ui->filesTableView->setModel(filesModel_);
+
+    stagedModel_ = new GitFilesModel();
+    stagedModel_->setIsStaged(true);
     ui->stagedTableView->setModel(stagedModel_);
 
     auto selectionModel = ui->filesTableView->selectionModel();
@@ -101,10 +103,8 @@ void MainWindow::onReceivedFromGit(QString data, bool isError) {
 
 void MainWindow::onGitStatusFinished(QVector<GitFile> files)
 {
-    filesModel_->setFiles({});
     filesModel_->setFiles(files);
-    stagedModel_->setFiles({});
-    stagedModel_->setFiles(files, true);
+    stagedModel_->setFiles(files);
 }
 
 void MainWindow::onOpenSettingsDialog()

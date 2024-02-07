@@ -8,7 +8,7 @@ class GitFilesModel : public QAbstractTableModel {
 public:
   GitFilesModel();
 
-  void setFiles(QVector<GitFile> files, bool isStaged = false);
+  void setFiles(QVector<GitFile> files);
 
   // QAbstractItemModel interface
 public:
@@ -16,10 +16,13 @@ public:
   int columnCount(const QModelIndex &parent) const;
   QVariant data(const QModelIndex &index, int role) const;
 
-private:
-  QVector<GitFile> files_;
+  void setIsStaged(bool isStaged);
 
-// QAbstractItemModel interface
-public:
-QVariant headerData(int section, Qt::Orientation orientation, int role) const;
+  private:
+  QVector<GitFile> files_;
+  bool isStaged_ = false;
+
+  // QAbstractItemModel interface
+  public:
+  QVariant headerData(int section, Qt::Orientation orientation, int role) const;
 };
