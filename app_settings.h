@@ -11,6 +11,10 @@ public:
     void save() const;
 
     QByteArray geometry;
+    QByteArray splitter_2_state;
+    QByteArray splitter_4_state;
+    QByteArray splitter_state;
+    QByteArray splitter_3_state;
     QString gitPath;
 };
 

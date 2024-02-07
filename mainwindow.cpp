@@ -19,6 +19,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     settings_.load();
     restoreGeometry(settings_.geometry);
+    ui->splitter_2->restoreState(settings_.splitter_2_state);
+    ui->splitter_4->restoreState(settings_.splitter_4_state);
+    ui->splitter->restoreState(settings_.splitter_state);
+    ui->splitter_3->restoreState(settings_.splitter_3_state);
 
     settingsDialog_ = new SettingsDialog(this);
     settingsDialog_->setModal(true);
@@ -121,6 +125,10 @@ void MainWindow::onSaveSettings()
 void MainWindow::closeEvent(QCloseEvent *event)
 {
     settings_.geometry = saveGeometry();
+    settings_.splitter_2_state = ui->splitter_2->saveState();
+    settings_.splitter_4_state = ui->splitter_4->saveState();
+    settings_.splitter_state = ui->splitter->saveState();
+    settings_.splitter_3_state = ui->splitter_3->saveState();
     settings_.save();
 
     QWidget::closeEvent(event);
