@@ -7,28 +7,34 @@
 #include <QProcess>
 #include <QtConcurrent/QtConcurrent>
 
-GitRepository::GitRepository(QObject *parent) : QObject(parent) {
-  git_ = new Git("C:\\Program Files\\SmartGit\\git\\bin\\git.exe", this);
+const static char *GIT_PATH = "C:\\Program Files\\Git\\cmd\\git.exe";
+//  git_ = new Git("C:\\Program Files\\SmartGit\\git\\bin\\git.exe", this);
 
-  watcher_ = new QFutureWatcher<QStringList>(this);
-  connect(watcher_, &QFutureWatcher<QStringList>::progressValueChanged, this,
-          &GitRepository::onFutureProgress);
-  connect(watcher_, &QFutureWatcher<QStringList>::canceled, this,
-          []() { qDebug() << "Canceled"; });
-  connect(watcher_, &QFutureWatcher<QStringList>::paused, this,
-          []() { qDebug() << "Paused"; });
-  connect(watcher_, &QFutureWatcher<QStringList>::destroyed, this,
-          []() { qDebug() << "Destroyed"; });
-  connect(watcher_, &QFutureWatcher<QStringList>::finished, this,
-          &GitRepository::onFinished);
+GitRepository::GitRepository(QObject *parent) : QObject(parent)
+{
+    git_ = new Git(GIT_PATH, this);
 
-  connect(watcher_, &QFutureWatcher<QStringList>::resultReadyAt, this,
-          &GitRepository::onResultReadyAt);
+    watcher_ = new QFutureWatcher<QStringList>(this);
+    connect(watcher_,
+            &QFutureWatcher<QStringList>::progressValueChanged,
+            this,
+            &GitRepository::onFutureProgress);
+    connect(watcher_, &QFutureWatcher<QStringList>::canceled, this, []() {
+        qDebug() << "Canceled";
+    });
+    connect(watcher_, &QFutureWatcher<QStringList>::paused, this, []() { qDebug() << "Paused"; });
+    connect(watcher_, &QFutureWatcher<QStringList>::destroyed, this, []() {
+        qDebug() << "Destroyed";
+    });
+    connect(watcher_, &QFutureWatcher<QStringList>::finished, this, &GitRepository::onFinished);
 
-  connect(watcher_, &QFutureWatcher<QStringList>::resumed, this,
-          []() { qDebug() << "Resumed"; });
-  connect(watcher_, &QFutureWatcher<QStringList>::started, this,
-          &GitRepository::onStarted);
+    connect(watcher_,
+            &QFutureWatcher<QStringList>::resultReadyAt,
+            this,
+            &GitRepository::onResultReadyAt);
+
+    connect(watcher_, &QFutureWatcher<QStringList>::resumed, this, []() { qDebug() << "Resumed"; });
+    connect(watcher_, &QFutureWatcher<QStringList>::started, this, &GitRepository::onStarted);
 }
 
 const QDir &GitRepository::getWorkingDir() const { return workingDir_; }
@@ -49,30 +55,29 @@ void GitRepository::status() {
 }
 
 void GitRepository::commit(QString message) {
+    QString program = GIT_PATH;
+    QStringList arguments;
+    arguments << "commit" << QString("--message=%1").arg(message);
 
-  QString program = "C:\\Program Files\\SmartGit\\git\\bin\\git.exe";
-  QStringList arguments;
-  arguments << "commit" << QString("--message=%1").arg(message);
+    if (gitProcess != nullptr)
+        gitProcess->deleteLater();
 
-  if (gitProcess != nullptr)
-    gitProcess->deleteLater();
+    gitProcess = new QProcess(this);
+    gitProcess->setWorkingDirectory(getWorkingDir().absolutePath());
 
-  gitProcess = new QProcess(this);
-  gitProcess->setWorkingDirectory(getWorkingDir().absolutePath());
+    connect(gitProcess,
+            static_cast<void (QProcess::*)(int exitCode, QProcess::ExitStatus exitStatus)>(
+                &QProcess::finished),
+            this,
+            &GitRepository::onFinish);
+    connect(gitProcess, &QProcess::readyRead, this, &GitRepository::onCommitRead);
+    connect(gitProcess,
+            static_cast<void (QProcess::*)(QProcess::ProcessError)>(&QProcess::error),
+            this,
+            &GitRepository::onError);
 
-  connect(
-      gitProcess,
-      static_cast<void (QProcess::*)(
-          int exitCode, QProcess::ExitStatus exitStatus)>(&QProcess::finished),
-      this, &GitRepository::onFinish);
-  connect(gitProcess, &QProcess::readyRead, this, &GitRepository::onCommitRead);
-  connect(
-      gitProcess,
-      static_cast<void (QProcess::*)(QProcess::ProcessError)>(&QProcess::error),
-      this, &GitRepository::onError);
-
-  emit sgnSended(QString("%1 %2").arg(program).arg(arguments.join(" ")));
-  gitProcess->start(program, arguments);
+    emit sgnSended(QString("%1 %2").arg(program).arg(arguments.join(" ")));
+    gitProcess->start(program, arguments);
 }
 
 void GitRepository::onStatusRead() {

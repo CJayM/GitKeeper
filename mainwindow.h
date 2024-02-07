@@ -42,9 +42,6 @@ private:
   GitFilesModel *filesModel_ = nullptr;
   GitRepository *gitRepository_ = nullptr;
 
-  QAction *statusAction_;
-  QAction *commitAction_;
-
   Git *git_ = nullptr;
 
   // QWidget interface

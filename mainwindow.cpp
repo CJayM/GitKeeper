@@ -28,18 +28,13 @@ MainWindow::MainWindow(QWidget *parent)
   connect(selectionModel, &QItemSelectionModel::currentChanged, this,
           &MainWindow::onCurrentFileChanged);
 
-  statusAction_ = new QAction("Status", this);
-  connect(statusAction_, &QAction::triggered, this,
-          &MainWindow::onStatusAction);
-  ui->toolBar->insertAction(nullptr, statusAction_);
+  connect(ui->actionStatus, &QAction::triggered, this, &MainWindow::onStatusAction);
 
-  commitAction_ = new QAction("Commit", this);
-  connect(commitAction_, &QAction::triggered, this,
-          &MainWindow::onCommitAction);
-  ui->btnCommit->setDefaultAction(commitAction_);
+  connect(ui->actionCommit, &QAction::triggered, this, &MainWindow::onCommitAction);
+  ui->btnCommit->setDefaultAction(ui->actionCommit);
 
   gitRepository_ = new GitRepository(this);
-  gitRepository_->setWorkingDir(QDir("D:\\develop\\git_keeper\\git_keeper"));
+  gitRepository_->setWorkingDir(QDir("D:\\develop\\git_keeper\\GitKeeper"));
   connect(gitRepository_, &GitRepository::sgnResultReceived, this,
           &MainWindow::onGitStatusFinished);
   connect(gitRepository_, &GitRepository::sgnSended, this,
