@@ -8,6 +8,8 @@
 
 #include "domain/git.h"
 
+#include "app_settings.h"
+
 QT_BEGIN_NAMESPACE
 namespace Ui {
 class MainWindow;
@@ -38,6 +40,7 @@ private slots:
   void onReceivedFromGit(QString data, bool isError);
   void onGitStatusFinished(QVector<GitFile> files);
   void onOpenSettingsDialog();
+  void onSaveSettings();
 
   private:
   Ui::MainWindow *ui;
@@ -48,6 +51,7 @@ private slots:
   Git *git_ = nullptr;
 
   SettingsDialog *settingsDialog_ = nullptr;
+  AppSettings settings_;
 
   // QWidget interface
 protected:

@@ -7,12 +7,10 @@
 #include <QProcess>
 #include <QtConcurrent/QtConcurrent>
 
-const static char *GIT_PATH = "C:\\Program Files\\Git\\cmd\\git.exe";
-//  git_ = new Git("C:\\Program Files\\SmartGit\\git\\bin\\git.exe", this);
-
-GitRepository::GitRepository(QObject *parent) : QObject(parent)
+GitRepository::GitRepository(AppSettings &settings, QObject *parent)
+    : QObject(parent), settings_(settings)
 {
-    git_ = new Git(GIT_PATH, this);
+    git_ = new Git(settings_.gitPath, this);
 
     watcher_ = new QFutureWatcher<QStringList>(this);
     connect(watcher_,
@@ -54,8 +52,8 @@ void GitRepository::status() {
   //  emit sgnSended(QString("%1 %2").arg(program).arg(arguments.join(" ")));
 }
 
-void GitRepository::commit(QString message) {
-    QString program = GIT_PATH;
+void GitRepository::commit(QString message)
+{
     QStringList arguments;
     arguments << "commit" << QString("--message=%1").arg(message);
 
@@ -76,8 +74,8 @@ void GitRepository::commit(QString message) {
             this,
             &GitRepository::onError);
 
-    emit sgnSended(QString("%1 %2").arg(program).arg(arguments.join(" ")));
-    gitProcess->start(program, arguments);
+    emit sgnSended(QString("%1 %2").arg(settings_.gitPath).arg(arguments.join(" ")));
+    gitProcess->start(settings_.gitPath, arguments);
 }
 
 void GitRepository::onStatusRead() {

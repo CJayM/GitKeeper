@@ -13,44 +13,53 @@
 
 #include <domain/git_repository.h>
 
-MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent), ui(new Ui::MainWindow) {
-  ui->setupUi(this);
+MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
+{
+    ui->setupUi(this);
 
-  QSettings settings("kb23", "GitKeeper");
-  restoreGeometry(settings.value("geometry").toByteArray());
+    settings_.load();
+    restoreGeometry(settings_.geometry);
 
-  settingsDialog_ = new SettingsDialog(this);
+    settingsDialog_ = new SettingsDialog(this);
+    settingsDialog_->setModal(true);
+    connect(settingsDialog_, &QDialog::accepted, this, &MainWindow::onSaveSettings);
 
-  filesModel_ = new GitFilesModel();
-  ui->filesTableView->setModel(filesModel_);
-  ui->stagedTableView->setModel(filesModel_);  
+    filesModel_ = new GitFilesModel();
+    ui->filesTableView->setModel(filesModel_);
+    ui->stagedTableView->setModel(filesModel_);
 
-  auto selectionModel = ui->filesTableView->selectionModel();
+    auto selectionModel = ui->filesTableView->selectionModel();
 
-  connect(selectionModel,
-          &QItemSelectionModel::currentChanged,
-          this,
-          &MainWindow::onCurrentFileChanged);
+    connect(selectionModel,
+            &QItemSelectionModel::currentChanged,
+            this,
+            &MainWindow::onCurrentFileChanged);
 
-  connect(ui->actionStatus, &QAction::triggered, this, &MainWindow::onStatusAction);
+    connect(ui->actionStatus, &QAction::triggered, this, &MainWindow::onStatusAction);
 
-  connect(ui->actionCommit, &QAction::triggered, this, &MainWindow::onCommitAction);
-  ui->btnCommit->setDefaultAction(ui->actionCommit);
+    connect(ui->actionCommit, &QAction::triggered, this, &MainWindow::onCommitAction);
+    ui->btnCommit->setDefaultAction(ui->actionCommit);
 
-  gitRepository_ = new GitRepository(this);
-  gitRepository_->setWorkingDir(QDir("D:\\develop\\git_keeper\\GitKeeper"));
-  connect(gitRepository_, &GitRepository::sgnResultReceived, this,
-          &MainWindow::onGitStatusFinished);
-  connect(gitRepository_, &GitRepository::sgnSended, this,
-          &MainWindow::onSendedToGit);
-  connect(gitRepository_, &GitRepository::sgnReceived, this, &MainWindow::onReceivedFromGit);
+    gitRepository_ = new GitRepository(settings_, this);
+    gitRepository_->setWorkingDir(QDir("D:\\develop\\git_keeper\\GitKeeper"));
+    connect(gitRepository_,
+            &GitRepository::sgnResultReceived,
+            this,
+            &MainWindow::onGitStatusFinished);
+    connect(gitRepository_, &GitRepository::sgnSended, this, &MainWindow::onSendedToGit);
+    connect(gitRepository_, &GitRepository::sgnReceived, this, &MainWindow::onReceivedFromGit);
 
-  connect(ui->actionOpenSettings, &QAction::triggered, this, &MainWindow::onOpenSettingsDialog);
-  gitRepository_->status();
+    connect(ui->actionOpenSettings, &QAction::triggered, this, &MainWindow::onOpenSettingsDialog);
+    gitRepository_->status();
 }
 
-MainWindow::~MainWindow() { delete ui; }
+MainWindow::~MainWindow()
+{
+    settingsDialog_->deleteLater();
+    settingsDialog_ = nullptr;
+
+    delete ui;
+}
 
 void MainWindow::onCurrentFileChanged(const QModelIndex &current,
                                       const QModelIndex &previous) {
@@ -97,12 +106,19 @@ void MainWindow::onGitStatusFinished(QVector<GitFile> files)
 
 void MainWindow::onOpenSettingsDialog()
 {
-    settingsDialog_->setModal(true);
+    settingsDialog_->loadSettings(settings_);
     settingsDialog_->show();
 }
 
-void MainWindow::closeEvent(QCloseEvent *event) {
-  QSettings settings("kb23", "GitKeeper");
-  settings.setValue("geometry", saveGeometry());
-  QWidget::closeEvent(event);
+void MainWindow::onSaveSettings()
+{
+    settingsDialog_->saveSettings(settings_);
+}
+
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+    settings_.geometry = saveGeometry();
+    settings_.save();
+
+    QWidget::closeEvent(event);
 }

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "app_settings.h"
+
 #include <QDialog>
 
 namespace Ui {
@@ -13,6 +15,12 @@ class SettingsDialog : public QDialog
 public:
     explicit SettingsDialog(QWidget *parent = nullptr);
     ~SettingsDialog();
+
+    void saveSettings(AppSettings &settings);
+    void loadSettings(const AppSettings &settings);
+
+private slots:
+    void onBrowseGitPathClicked();
 
 private:
     Ui::SettingsDialog *ui;
