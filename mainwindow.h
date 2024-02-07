@@ -46,6 +46,7 @@ private slots:
   Ui::MainWindow *ui;
 
   GitFilesModel *filesModel_ = nullptr;
+  GitFilesModel *stagedModel_ = nullptr;
   GitRepository *gitRepository_ = nullptr;
 
   Git *git_ = nullptr;

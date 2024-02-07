@@ -1,11 +1,24 @@
 #include "git_files_model.h"
+#include <QDebug>
 
 GitFilesModel::GitFilesModel() {}
 
-void GitFilesModel::setFiles(QVector<GitFile> files) {
-  beginResetModel();
-  files_ = files;
-  endResetModel();
+void GitFilesModel::setFiles(QVector<GitFile> files, bool isStaged)
+{
+    beginResetModel();
+    files_.clear();
+
+    for (const auto &file : files) {
+        if (isStaged) {
+            if (file.indexState >= FileState::MODIFIED)
+                files_ << file;
+        } else {
+            if (file.workState >= FileState::UNTRACKED)
+                files_ << file;
+            files_ << file;
+        }
+    }
+    endResetModel();
 }
 
 int GitFilesModel::rowCount(const QModelIndex &parent) const {
@@ -27,9 +40,9 @@ QVariant GitFilesModel::data(const QModelIndex &index, int role) const {
     case 0:
       return files_[pos].name;
     case 1:
-      return QString("%1 %2")
-          .arg(stateToChar(files_[pos].indexState))
-          .arg(stateToChar(files_[pos].workState));
+        return QString("%1 %2")
+            .arg(stateToChar(files_[pos].indexState))
+            .arg(stateToChar(files_[pos].workState));
     case 2:
       return files_[pos].path;
     }

@@ -2,18 +2,18 @@
 
 #include <QString>
 
-enum class FileState {
-  UNRECOGNIZED,
-  UNMODIFIED,
-  MODIFIED,
-  TYPE_CHANGED,
-  ADDED,
-  DELETED,
-  RENAMED,
-  COPIED,
-  UPDATED_NOT_MERGED,
-  UNTRACKED,
-  IGNORED,
+enum class FileState : qint8 {
+    UNRECOGNIZED = -1,
+    UNMODIFIED,
+    IGNORED,
+    UNTRACKED,
+    MODIFIED,
+    TYPE_CHANGED,
+    ADDED,
+    DELETED,
+    RENAMED,
+    COPIED,
+    UPDATED_NOT_MERGED,
 };
 
 QChar stateToChar(FileState state);

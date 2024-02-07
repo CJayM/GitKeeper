@@ -8,7 +8,7 @@ class GitFilesModel : public QAbstractTableModel {
 public:
   GitFilesModel();
 
-  void setFiles(QVector<GitFile> files);
+  void setFiles(QVector<GitFile> files, bool isStaged = false);
 
   // QAbstractItemModel interface
 public:
