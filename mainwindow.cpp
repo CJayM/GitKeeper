@@ -37,8 +37,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
             &MainWindow::onCurrentFileChanged);
 
     connect(ui->actionStatus, &QAction::triggered, this, &MainWindow::onStatusAction);
-
     connect(ui->actionCommit, &QAction::triggered, this, &MainWindow::onCommitAction);
+
     ui->btnCommit->setDefaultAction(ui->actionCommit);
 
     gitRepository_ = new GitRepository(settings_, this);

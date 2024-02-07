@@ -1,5 +1,7 @@
 #pragma once
 
+#include "git_file.h"
+
 #include <QObject>
 
 class Git : public QObject {
@@ -7,10 +9,10 @@ class Git : public QObject {
 public:
   explicit Git(QString git_path, QObject *parent = nullptr);
 
-  QStringList status(const QString &workDir);
+  CommandResult status(const QString &workDir);
 
-signals:
+  signals:
 
-private:
+  private:
   QString git_path_;
 };

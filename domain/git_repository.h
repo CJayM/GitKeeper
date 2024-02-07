@@ -12,7 +12,7 @@
 class Git;
 
 class GitRepository : public QObject {
-  Q_OBJECT
+    Q_OBJECT
 public:
     GitRepository(AppSettings &settings, QObject *parent);
     const QDir &getWorkingDir() const;
@@ -23,11 +23,11 @@ public:
 
 signals:
 
-  void sgnSended(QString data);
-  void sgnReceived(QString data, bool isError);
+    void sgnSended(QString data);
+    void sgnReceived(QString data, bool isError);
 
-  void sgnResultReceived(QVector<GitFile> result);
-  void sgnFinished();
+    void sgnResultReceived(QVector<GitFile> result);
+    void sgnFinished();
 
 private slots:
   void onStatusRead();
@@ -45,8 +45,8 @@ private:
   QProcess *gitProcess = nullptr;
   AppSettings &settings_;
   Git *git_ = nullptr;
-  QFuture<QStringList> future_;
-  QFutureWatcher<QStringList> *watcher_;
+  QFuture<CommandResult> future_;
+  QFutureWatcher<CommandResult> *watcher_;
 
   QVector<GitFile> proccessGitStatus(QString data);
 };

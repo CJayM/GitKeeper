@@ -15,7 +15,6 @@ void GitFilesModel::setFiles(QVector<GitFile> files, bool isStaged)
         } else {
             if (file.workState >= FileState::UNTRACKED)
                 files_ << file;
-            files_ << file;
         }
     }
     endResetModel();

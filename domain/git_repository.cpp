@@ -12,27 +12,29 @@ GitRepository::GitRepository(AppSettings &settings, QObject *parent)
 {
     git_ = new Git(settings_.gitPath, this);
 
-    watcher_ = new QFutureWatcher<QStringList>(this);
+    watcher_ = new QFutureWatcher<CommandResult>(this);
     connect(watcher_,
-            &QFutureWatcher<QStringList>::progressValueChanged,
+            &QFutureWatcher<CommandResult>::progressValueChanged,
             this,
             &GitRepository::onFutureProgress);
-    connect(watcher_, &QFutureWatcher<QStringList>::canceled, this, []() {
+    connect(watcher_, &QFutureWatcher<CommandResult>::canceled, this, []() {
         qDebug() << "Canceled";
     });
-    connect(watcher_, &QFutureWatcher<QStringList>::paused, this, []() { qDebug() << "Paused"; });
-    connect(watcher_, &QFutureWatcher<QStringList>::destroyed, this, []() {
+    connect(watcher_, &QFutureWatcher<CommandResult>::paused, this, []() { qDebug() << "Paused"; });
+    connect(watcher_, &QFutureWatcher<CommandResult>::destroyed, this, []() {
         qDebug() << "Destroyed";
     });
-    connect(watcher_, &QFutureWatcher<QStringList>::finished, this, &GitRepository::onFinished);
+    connect(watcher_, &QFutureWatcher<CommandResult>::finished, this, &GitRepository::onFinished);
 
     connect(watcher_,
-            &QFutureWatcher<QStringList>::resultReadyAt,
+            &QFutureWatcher<CommandResult>::resultReadyAt,
             this,
             &GitRepository::onResultReadyAt);
 
-    connect(watcher_, &QFutureWatcher<QStringList>::resumed, this, []() { qDebug() << "Resumed"; });
-    connect(watcher_, &QFutureWatcher<QStringList>::started, this, &GitRepository::onStarted);
+    connect(watcher_, &QFutureWatcher<CommandResult>::resumed, this, []() {
+        qDebug() << "Resumed";
+    });
+    connect(watcher_, &QFutureWatcher<CommandResult>::started, this, &GitRepository::onStarted);
 }
 
 const QDir &GitRepository::getWorkingDir() const { return workingDir_; }
@@ -123,7 +125,7 @@ void GitRepository::onFutureProgress(int progressValue) {
 void GitRepository::onResultReadyAt(int resultIndex) {
   qDebug() << "onResultReadyAt" << resultIndex;
   auto res = future_.resultAt(resultIndex);
-  auto files = proccessGitStatus(res.join("\n"));
+  auto files = proccessGitStatus(res.result.join("\n"));
   emit sgnResultReceived(files);
 }
 void GitRepository::onFinished() {

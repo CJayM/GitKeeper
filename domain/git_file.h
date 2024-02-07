@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QString>
+#include <QStringList>
 
 enum class FileState : qint8 {
     UNRECOGNIZED = -1,
@@ -32,4 +33,10 @@ struct GitFile {
   QString fileModeWorkTree;
   QString nameHead;
   QString nameIndex;
+};
+
+struct CommandResult
+{
+    QStringList arguments;
+    QStringList result;
 };
