@@ -3,17 +3,16 @@
 #include <QDebug>
 #include <QProcess>
 
-Git::Git(QString git_path, QObject *parent)
-    : QObject{parent}, git_path_(git_path) {}
+Git::Git(QObject *parent) : QObject{parent} {}
 
-CommandResult Git::status(const QString &workDir)
+CommandResult Git::status(const QString &workDir, const QString &gitPath)
 {
     CommandResult result;
     result.arguments << "status"
                      << "--porcelain=2";
     auto proccess = new QProcess(this);
     proccess->setWorkingDirectory(workDir);
-    proccess->start(git_path_, result.arguments);
+    proccess->start(gitPath, result.arguments);
 
     if (!proccess->waitForStarted())
         return result;

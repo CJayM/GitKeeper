@@ -10,7 +10,7 @@
 GitRepository::GitRepository(AppSettings &settings, QObject *parent)
     : QObject(parent), settings_(settings)
 {
-    git_ = new Git(settings_.gitPath, this);
+    git_ = new Git(this);
 
     watcher_ = new QFutureWatcher<CommandResult>(this);
     connect(watcher_,
@@ -47,8 +47,7 @@ void GitRepository::status() {
   if (future_.isRunning())
     future_.cancel();
 
-  future_ =
-      QtConcurrent::run(git_, &Git::status, getWorkingDir().absolutePath());
+  future_ = QtConcurrent::run(git_, &Git::status, getWorkingDir().absolutePath(), settings_.gitPath);
   watcher_->setFuture(future_);
 
   //  emit sgnSended(QString("%1 %2").arg(program).arg(arguments.join(" ")));

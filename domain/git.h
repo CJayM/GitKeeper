@@ -4,15 +4,15 @@
 
 #include <QObject>
 
-class Git : public QObject {
-  Q_OBJECT
+class Git : public QObject
+{
+    Q_OBJECT
 public:
-  explicit Git(QString git_path, QObject *parent = nullptr);
+    explicit Git(QObject *parent = nullptr);
 
-  CommandResult status(const QString &workDir);
+    CommandResult status(const QString &workDir, const QString &gitPath);
 
-  signals:
+signals:
 
-  private:
-  QString git_path_;
+private:
 };
