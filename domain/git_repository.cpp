@@ -17,8 +17,9 @@ GitRepository::GitRepository(AppSettings &settings, QObject *parent)
             &QFutureWatcher<CommandResult>::progressValueChanged,
             this,
             &GitRepository::onFutureProgress);
-    connect(watcher_, &QFutureWatcher<CommandResult>::canceled, this, []() {
+    connect(watcher_, &QFutureWatcher<CommandResult>::canceled, this, [&]() {
         qDebug() << "Canceled";
+        emit sgnReceived("Cancel", true);
     });
     connect(watcher_, &QFutureWatcher<CommandResult>::paused, this, []() { qDebug() << "Paused"; });
     connect(watcher_, &QFutureWatcher<CommandResult>::destroyed, this, []() {
@@ -45,12 +46,18 @@ void GitRepository::status() {
   if (watcher_)
     watcher_->cancel();
   if (future_.isRunning())
-    future_.cancel();
+      future_.cancel();
 
-  future_ = QtConcurrent::run(git_, &Git::status, getWorkingDir().absolutePath(), settings_.gitPath);
+  auto params = git_->makeStatusCommand();
+
+  future_ = QtConcurrent::run(git_,
+                              &Git::execute,
+                              getWorkingDir().absolutePath(),
+                              settings_.gitPath,
+                              params);
   watcher_->setFuture(future_);
 
-  //  emit sgnSended(QString("%1 %2").arg(program).arg(arguments.join(" ")));
+  emit sgnSended(QString("%1 %2").arg(settings_.gitPath).arg(params.join(" ")));
 }
 
 void GitRepository::commit(QString message)
@@ -122,9 +129,13 @@ void GitRepository::onFutureProgress(int progressValue) {
   qDebug() << "onFutureProgress" << progressValue;
 }
 void GitRepository::onResultReadyAt(int resultIndex) {
-  qDebug() << "onResultReadyAt" << resultIndex;
+  qDebug() << "onResultReadyAt" << resultIndex;  
   auto res = future_.resultAt(resultIndex);
-  auto files = proccessGitStatus(res.result.join("\n"));
+
+  auto text = res.result.join("\n");
+  emit sgnReceived(text, false);
+
+  auto files = proccessGitStatus(text);
   emit sgnResultReceived(files);
 }
 void GitRepository::onFinished() {

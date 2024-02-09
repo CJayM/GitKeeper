@@ -10,7 +10,8 @@ class Git : public QObject
 public:
     explicit Git(QObject *parent = nullptr);
 
-    CommandResult status(const QString &workDir, const QString &gitPath);
+    CommandResult execute(const QString &workDir, const QString &gitPath, const QStringList &params);
+    QStringList makeStatusCommand();
 
 signals:
 

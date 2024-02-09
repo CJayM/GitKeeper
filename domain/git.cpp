@@ -5,14 +5,14 @@
 
 Git::Git(QObject *parent) : QObject{parent} {}
 
-CommandResult Git::status(const QString &workDir, const QString &gitPath)
+CommandResult Git::execute(const QString &workDir, const QString &gitPath, const QStringList &params)
 {
     CommandResult result;
-    result.arguments << "status"
-                     << "--porcelain=2";
+    result.arguments = params;
+
     auto proccess = new QProcess(this);
     proccess->setWorkingDirectory(workDir);
-    proccess->start(gitPath, result.arguments);
+    proccess->start(gitPath, params);
 
     if (!proccess->waitForStarted())
         return result;
@@ -27,5 +27,13 @@ CommandResult Git::status(const QString &workDir, const QString &gitPath)
 
     QByteArray res = proccess->readAll();
     result.result.append(QString(res));
+    return result;
+}
+
+QStringList Git::makeStatusCommand()
+{
+    QStringList result;
+    result << "status"
+           << "--porcelain=2";
     return result;
 }
