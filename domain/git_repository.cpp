@@ -62,81 +62,42 @@ void GitRepository::status() {
 
 void GitRepository::commit(QString message)
 {
-    QStringList arguments;
-    arguments << "commit" << QString("--message=%1").arg(message);
+    if (watcher_)
+        watcher_->cancel();
 
-    if (gitProcess != nullptr)
-        gitProcess->deleteLater();
+    if (future_.isRunning())
+        future_.cancel();
 
-    gitProcess = new QProcess(this);
-    gitProcess->setWorkingDirectory(getWorkingDir().absolutePath());
+    auto params = git_->makeCommitCommand(message);
 
-    connect(gitProcess,
-            static_cast<void (QProcess::*)(int exitCode, QProcess::ExitStatus exitStatus)>(
-                &QProcess::finished),
-            this,
-            &GitRepository::onFinish);
-    connect(gitProcess, &QProcess::readyRead, this, &GitRepository::onCommitRead);
-    connect(gitProcess,
-            static_cast<void (QProcess::*)(QProcess::ProcessError)>(&QProcess::error),
-            this,
-            &GitRepository::onError);
+    future_ = QtConcurrent::run(git_,
+                                &Git::execute,
+                                getWorkingDir().absolutePath(),
+                                settings_.gitPath,
+                                params);
+    watcher_->setFuture(future_);
 
-    emit sgnSended(QString("%1 %2").arg(settings_.gitPath).arg(arguments.join(" ")));
-    gitProcess->start(settings_.gitPath, arguments);
+    emit sgnSended(QString("%1 %2").arg(settings_.gitPath).arg(params.join(" ")));
 }
 
-void GitRepository::onStatusRead() {
-  qDebug() << "ReadyRead";
-  auto normal = gitProcess->readAllStandardOutput();
-
-  emit sgnReceived(normal, false);
-  proccessGitStatus(normal);
+void GitRepository::onStarted()
+{
+    qDebug() << "onStarted";
 }
-
-void GitRepository::onCommitRead() {
-  qDebug() << "CommitRead";
-  auto normal = gitProcess->readAllStandardOutput();
-  if (normal.isNull() == false) {
-    emit sgnReceived(normal, false);
-    //	proccessGitStatus(normal);
-  }
-}
-
-void GitRepository::onFinish(int exitCode, QProcess::ExitStatus exitStatus) {
-  auto normal = gitProcess->readAllStandardOutput();
-  auto error = gitProcess->readAllStandardError();
-  if (error.isNull() == false) {
-    emit sgnReceived(error, true);
-  }
-  if (normal.isNull() == false) {
-    Q_ASSERT(normal.isEmpty());
-    emit sgnReceived(normal, false);
-  }
-  gitProcess->deleteLater();
-  gitProcess = nullptr;
-}
-
-void GitRepository::onError(QProcess::ProcessError error) {
-  auto message = gitProcess->readAllStandardOutput();
-  emit sgnReceived(message, true);
-  qDebug() << error;
-}
-
-void GitRepository::onStarted() { qDebug() << "onStarted"; }
 
 void GitRepository::onFutureProgress(int progressValue) {
   qDebug() << "onFutureProgress" << progressValue;
 }
-void GitRepository::onResultReadyAt(int resultIndex) {
-  qDebug() << "onResultReadyAt" << resultIndex;  
-  auto res = future_.resultAt(resultIndex);
+void GitRepository::onResultReadyAt(int resultIndex)
+{
+    qDebug() << "onResultReadyAt" << resultIndex;
+    auto res = future_.resultAt(resultIndex);
 
-  auto text = res.result.join("\n");
-  emit sgnReceived(text, false);
+    auto text = res.result.join("\n");
+    emit sgnReceived(text, false);
 
-  auto files = proccessGitStatus(text);
-  emit sgnResultReceived(files);
+    auto files = proccessGitStatus(text);
+    emit sgnResultReceived(files);
 }
 void GitRepository::onFinished() {
   qDebug() << "onFinished";

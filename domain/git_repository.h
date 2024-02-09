@@ -11,7 +11,8 @@
 
 class Git;
 
-class GitRepository : public QObject {
+class GitRepository : public QObject
+{
     Q_OBJECT
 public:
     GitRepository(AppSettings &settings, QObject *parent);
@@ -30,23 +31,17 @@ signals:
     void sgnFinished();
 
 private slots:
-  void onStatusRead();
-  void onCommitRead();
-  void onFinish(int exitCode, QProcess::ExitStatus exitStatus);
-  void onError(QProcess::ProcessError error);
-
   void onFutureProgress(int progressValue);
   void onFinished();
   void onResultReadyAt(int resultIndex);
   void onStarted();
 
 private:
-  QDir workingDir_;
-  QProcess *gitProcess = nullptr;
-  AppSettings &settings_;
-  Git *git_ = nullptr;
-  QFuture<CommandResult> future_;
-  QFutureWatcher<CommandResult> *watcher_;
+    QDir workingDir_;
+    AppSettings &settings_;
+    Git *git_ = nullptr;
+    QFuture<CommandResult> future_;
+    QFutureWatcher<CommandResult> *watcher_;
 
-  QVector<GitFile> proccessGitStatus(QString data);
+    QVector<GitFile> proccessGitStatus(QString data);
 };

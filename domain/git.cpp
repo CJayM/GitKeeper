@@ -30,10 +30,18 @@ CommandResult Git::execute(const QString &workDir, const QString &gitPath, const
     return result;
 }
 
-QStringList Git::makeStatusCommand()
+QStringList Git::makeStatusCommand() const
 {
     QStringList result;
     result << "status"
            << "--porcelain=2";
+    return result;
+}
+
+QStringList Git::makeCommitCommand(QString message) const
+{
+    QStringList result;
+    result << "commit"
+           << "--message=" + message;
     return result;
 }
