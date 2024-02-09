@@ -44,11 +44,13 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     connect(ui->actionStatus, &QAction::triggered, this, &MainWindow::onStatusAction);
     connect(ui->actionCommit, &QAction::triggered, this, &MainWindow::onCommitAction);
+    connect(ui->actionOpenSettings, &QAction::triggered, this, &MainWindow::onOpenSettingsDialog);
 
     ui->btnCommit->setDefaultAction(ui->actionCommit);
 
     connect(ui->btnClearLog, &QAbstractButton::clicked, this, [&]() { ui->logMessage->clear(); });
     connect(ui->commitMessageEdit, &QTextEdit::textChanged, this, &MainWindow::onCommitTextChanged);
+    connect(ui->amendCheckBox, &QCheckBox::toggled, this, &MainWindow::onAmnedChecked);
 
     gitRepository_ = new GitRepository(settings_, this);
     gitRepository_->setWorkingDir(QDir("D:\\develop\\git_keeper\\GitKeeper"));
@@ -58,8 +60,11 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
             &MainWindow::onGitStatusFinished);
     connect(gitRepository_, &GitRepository::sgnSended, this, &MainWindow::onSendedToGit);
     connect(gitRepository_, &GitRepository::sgnReceived, this, &MainWindow::onReceivedFromGit);
+    connect(gitRepository_,
+            &GitRepository::sgnLastMessageReady,
+            this,
+            &MainWindow::onReceivedLastMessage);
 
-    connect(ui->actionOpenSettings, &QAction::triggered, this, &MainWindow::onOpenSettingsDialog);
     gitRepository_->status();
 }
 
@@ -92,7 +97,7 @@ void MainWindow::onStatusAction() {
 
 void MainWindow::onCommitAction() {
   auto message = ui->commitMessageEdit->toPlainText();
-  gitRepository_->commit(message);
+  gitRepository_->commit(message, ui->amendCheckBox->isChecked());
 
   ui->commitMessageEdit->clear();
 }
@@ -105,7 +110,13 @@ void MainWindow::onReceivedFromGit(QString data, bool isError) {
   if (isError)
     ui->logMessage->append(QString("ERROR:<i>%1</i>").arg(data));
   else
-    ui->logMessage->append(QString("<span>%1</span>").arg(data));
+      ui->logMessage->append(QString("<span>%1</span>").arg(data));
+}
+
+void MainWindow::onReceivedLastMessage(QString data)
+{
+    lastCommitMessage_ = data;
+    ui->commitMessageEdit->setPlainText(data);
 }
 
 void MainWindow::onGitStatusFinished(QVector<GitFile> files)
@@ -133,6 +144,18 @@ void MainWindow::onCommitTextChanged()
     }
 
     ui->btnCommit->setEnabled(ui->commitMessageEdit->toPlainText().isEmpty() == false);
+}
+
+void MainWindow::onAmnedChecked(bool checked)
+{
+    if (checked == false) {
+        if (ui->commitMessageEdit->toPlainText() == lastCommitMessage_)
+            ui->commitMessageEdit->clear();
+        return;
+    }
+
+    gitRepository_->requestLastCommitMessage();
+    //    ui->commitMessageEdit->setPlainText(lastCommitMessage_);
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)

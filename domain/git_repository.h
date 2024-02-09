@@ -11,7 +11,7 @@
 
 class Git;
 
-enum class GIT_COMMAND { NO, COMMIT, STATUS, AMNED_LAST_MESSAGE };
+enum class GIT_COMMAND { NO, COMMIT, STATUS, LAST_MESSAGE };
 
 class GitRepository : public QObject
 {
@@ -22,8 +22,8 @@ public:
     void setWorkingDir(const QDir &dir);
 
     void status();
-    void commit(QString message);
-    QString getLastCommitMessage();
+    void commit(QString message, bool isAmend);
+    void requestLastCommitMessage();
 
 signals:
 
@@ -32,6 +32,7 @@ signals:
 
     void sgnResultReceived(QVector<GitFile> result);
     void sgnFinished();
+    void sgnLastMessageReady(QString msg);
 
 private slots:
   void onFutureProgress(int progressValue);
@@ -49,4 +50,5 @@ private slots:
   GIT_COMMAND currentCommand_ = GIT_COMMAND::NO;
 
   QVector<GitFile> proccessGitStatus(QString data);
+  void proccessLastMessage(QString text);
 };

@@ -12,7 +12,8 @@ public:
 
     CommandResult execute(const QString &workDir, const QString &gitPath, const QStringList &params);
     QStringList makeStatusCommand() const;
-    QStringList makeCommitCommand(QString message) const;
+    QStringList makeCommitCommand(QString message, bool isAmend) const;
+    QStringList makeLastCommitMessageCommand() const;
 
 signals:
 

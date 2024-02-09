@@ -38,10 +38,12 @@ private slots:
 
   void onSendedToGit(QString data);
   void onReceivedFromGit(QString data, bool isError);
+  void onReceivedLastMessage(QString data);
   void onGitStatusFinished(QVector<GitFile> files);
   void onOpenSettingsDialog();
   void onSaveSettings();
   void onCommitTextChanged();
+  void onAmnedChecked(bool checked);
 
   private:
   Ui::MainWindow *ui;
@@ -49,6 +51,7 @@ private slots:
   GitFilesModel *filesModel_ = nullptr;
   GitFilesModel *stagedModel_ = nullptr;
   GitRepository *gitRepository_ = nullptr;
+  QString lastCommitMessage_ = "Amned text placed";
 
   Git *git_ = nullptr;
 
