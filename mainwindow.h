@@ -41,6 +41,7 @@ private slots:
   void onGitStatusFinished(QVector<GitFile> files);
   void onOpenSettingsDialog();
   void onSaveSettings();
+  void onCommitTextChanged();
 
   private:
   Ui::MainWindow *ui;

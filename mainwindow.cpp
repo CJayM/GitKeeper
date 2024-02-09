@@ -48,6 +48,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     ui->btnCommit->setDefaultAction(ui->actionCommit);
 
     connect(ui->btnClearLog, &QAbstractButton::clicked, this, [&]() { ui->logMessage->clear(); });
+    connect(ui->commitMessageEdit, &QTextEdit::textChanged, this, &MainWindow::onCommitTextChanged);
 
     gitRepository_ = new GitRepository(settings_, this);
     gitRepository_->setWorkingDir(QDir("D:\\develop\\git_keeper\\GitKeeper"));
@@ -122,6 +123,16 @@ void MainWindow::onOpenSettingsDialog()
 void MainWindow::onSaveSettings()
 {
     settingsDialog_->saveSettings(settings_);
+}
+
+void MainWindow::onCommitTextChanged()
+{
+    if (stagedModel_->rowCount({}) == 0) {
+        ui->btnCommit->setEnabled(false);
+        return;
+    }
+
+    ui->btnCommit->setEnabled(ui->commitMessageEdit->toPlainText().isEmpty() == false);
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)
