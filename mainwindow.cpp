@@ -47,6 +47,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     ui->btnCommit->setDefaultAction(ui->actionCommit);
 
+    connect(ui->btnClearLog, &QAbstractButton::clicked, this, [&]() { ui->logMessage->clear(); });
+
     gitRepository_ = new GitRepository(settings_, this);
     gitRepository_->setWorkingDir(QDir("D:\\develop\\git_keeper\\GitKeeper"));
     connect(gitRepository_,
