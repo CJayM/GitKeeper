@@ -98,13 +98,20 @@ void GitRepository::onResultReadyAt(int resultIndex)
     auto text = res.result.join("\n");
     emit sgnReceived(text, false);
 
-    auto files = proccessGitStatus(text);
-    emit sgnResultReceived(files);
+    if (currentCommand_ == GIT_COMMAND::STATUS) {
+        auto files = proccessGitStatus(text);
+        emit sgnResultReceived(files);
+    }
+    if (currentCommand_ == GIT_COMMAND::COMMIT) {
+    }
+
+    currentCommand_ = GIT_COMMAND::NO;
 }
-void GitRepository::onFinished() {
-  qDebug() << "onFinished";
-  //  currentCommand_ = GIT_COMMAND::NO;
-  emit sgnFinished();
+void GitRepository::onFinished()
+{
+    qDebug() << "onFinished";
+    //  currentCommand_ = GIT_COMMAND::NO;
+    emit sgnFinished();
 }
 
 QVector<GitFile> GitRepository::proccessGitStatus(QString data) {
