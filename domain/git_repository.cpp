@@ -48,6 +48,7 @@ void GitRepository::status() {
   if (future_.isRunning())
       future_.cancel();
 
+  currentCommand_ = GIT_COMMAND::STATUS;
   auto params = git_->makeStatusCommand();
 
   future_ = QtConcurrent::run(git_,
@@ -68,6 +69,7 @@ void GitRepository::commit(QString message)
     if (future_.isRunning())
         future_.cancel();
 
+    currentCommand_ = GIT_COMMAND::COMMIT;
     auto params = git_->makeCommitCommand(message);
 
     future_ = QtConcurrent::run(git_,
@@ -101,6 +103,7 @@ void GitRepository::onResultReadyAt(int resultIndex)
 }
 void GitRepository::onFinished() {
   qDebug() << "onFinished";
+  //  currentCommand_ = GIT_COMMAND::NO;
   emit sgnFinished();
 }
 
@@ -109,12 +112,13 @@ QVector<GitFile> GitRepository::proccessGitStatus(QString data) {
 
   QVector<GitFile> files;
 
-  for (const auto &line : lines) {
-    if (line.isEmpty())
-      continue;
-    GitFile file;
-    if (line[0] == '1') {
-      file.indexState = charToState(line[2]);
+  for (const auto &line : qAsConst(lines)) {
+      if (line.isEmpty())
+          continue;
+
+      GitFile file;
+      if (line[0] == '1') {
+          file.indexState = charToState(line[2]);
       file.workState = charToState(line[3]);
       file.submoduleState = line.mid(5, 4);
       file.fileModeHead = line.mid(10, 6);

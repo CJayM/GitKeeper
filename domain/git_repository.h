@@ -11,6 +11,8 @@
 
 class Git;
 
+enum class GIT_COMMAND { NO, COMMIT, STATUS, AMNED_LAST_MESSAGE };
+
 class GitRepository : public QObject
 {
     Q_OBJECT
@@ -21,6 +23,7 @@ public:
 
     void status();
     void commit(QString message);
+    QString getLastCommitMessage();
 
 signals:
 
@@ -36,12 +39,14 @@ private slots:
   void onResultReadyAt(int resultIndex);
   void onStarted();
 
-private:
-    QDir workingDir_;
-    AppSettings &settings_;
-    Git *git_ = nullptr;
-    QFuture<CommandResult> future_;
-    QFutureWatcher<CommandResult> *watcher_;
+  private:
+  QDir workingDir_;
+  AppSettings &settings_;
+  Git *git_ = nullptr;
+  QFuture<CommandResult> future_;
+  QFutureWatcher<CommandResult> *watcher_;
 
-    QVector<GitFile> proccessGitStatus(QString data);
+  GIT_COMMAND currentCommand_ = GIT_COMMAND::NO;
+
+  QVector<GitFile> proccessGitStatus(QString data);
 };
