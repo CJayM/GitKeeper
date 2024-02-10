@@ -1,16 +1,19 @@
-#include <QAbstractTableModel>
-
-#include <domain/git_file.h>
-
 #pragma once
 
-class GitFilesModel : public QAbstractTableModel {
+#include "domain/git_file.h"
+#include <QAbstractTableModel>
+
+class GitFilesModel : public QAbstractTableModel
+{
 public:
-  GitFilesModel();
+    const static int NAME_ROLE = Qt::UserRole + 1;
+    const static int PATH_ROLE = Qt::UserRole + 2;
 
-  void setFiles(QVector<GitFile> files);
+    GitFilesModel();
 
-  // QAbstractItemModel interface
+    void setFiles(QVector<GitFile> files);
+
+    // QAbstractItemModel interface
 public:
   int rowCount(const QModelIndex &parent) const;
   int columnCount(const QModelIndex &parent) const;

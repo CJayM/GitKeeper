@@ -70,6 +70,14 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
             &GitRepository::sgnLastMessageReady,
             this,
             &MainWindow::onReceivedLastMessage);
+    connect(gitRepository_,
+            &GitRepository::sgnCurrentFileReaded,
+            this,
+            &MainWindow::onCurrentFileReaded);
+    connect(gitRepository_,
+            &GitRepository::sgnOriginalFileReaded,
+            this,
+            &MainWindow::onOriginalFileReaded);
 
     gitRepository_->status();
 }
@@ -83,18 +91,22 @@ MainWindow::~MainWindow()
 }
 
 void MainWindow::onCurrentFileChanged(const QModelIndex &current,
-                                      const QModelIndex &previous) {
-  qDebug() << "Changed" << current;
+                                      const QModelIndex &previous) {  
   if (current.isValid() == false) {
     ui->originalFileEdit->clear();
     ui->currentFileEdit->clear();
     return;
   }
 
-  auto file =
-      filesModel_->data(current.sibling(current.row(), 0), Qt::DisplayRole)
-          .toString();
-  ui->currentFileEdit->setText(file);
+  auto file = filesModel_->data(current.sibling(current.row(), 0), GitFilesModel::NAME_ROLE)
+                  .toString();
+  auto path = filesModel_->data(current.sibling(current.row(), 0), GitFilesModel::PATH_ROLE)
+                  .toString();
+
+  QDir dir(path);
+  auto filepath = dir.filePath(file);
+  gitRepository_->readStagedOrCommitedFile(filepath);
+  gitRepository_->readCurrentFile(filepath);
 }
 
 void MainWindow::onStatusAction() {  
@@ -166,9 +178,18 @@ void MainWindow::onAmnedChecked(bool checked)
 
 void MainWindow::onCurrentFileVScrollBarChanged(int value)
 {
-    qDebug() << "Changed" << value;
     auto scrollBar = ui->originalFileEdit->verticalScrollBar();
     scrollBar->setValue(value);
+}
+
+void MainWindow::onCurrentFileReaded(QString filepath, QString data)
+{
+    ui->currentFileEdit->setText(data);
+}
+
+void MainWindow::onOriginalFileReaded(QString data)
+{
+    ui->originalFileEdit->setText(data);
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)

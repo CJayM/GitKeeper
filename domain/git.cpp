@@ -62,3 +62,11 @@ QStringList Git::makeLastCommitMessageCommand() const
            << "--oneline";
     return result;
 }
+
+QStringList Git::makeShowCommand(QString filepath) const
+{
+    QStringList result;
+    result << "show"
+           << "HEAD^^^:" + filepath;
+    return result;
+}

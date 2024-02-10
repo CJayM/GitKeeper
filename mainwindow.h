@@ -45,6 +45,8 @@ private slots:
   void onCommitTextChanged();
   void onAmnedChecked(bool checked);
   void onCurrentFileVScrollBarChanged(int value);
+  void onCurrentFileReaded(QString filepath, QString data);
+  void onOriginalFileReaded(QString data);
 
   private:
   Ui::MainWindow *ui;

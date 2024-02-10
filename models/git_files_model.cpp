@@ -48,6 +48,20 @@ QVariant GitFilesModel::data(const QModelIndex &index, int role) const {
 
     return index.column();
   }
+
+  if (role == NAME_ROLE) {
+      int pos = index.row();
+      if (pos >= files_.size())
+          return {};
+      return files_[pos].name;
+  }
+  if (role == PATH_ROLE) {
+      int pos = index.row();
+      if (pos >= files_.size())
+          return {};
+      return files_[pos].path;
+  }
+
   return {};
 }
 

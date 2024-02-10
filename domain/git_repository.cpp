@@ -101,6 +101,38 @@ void GitRepository::requestLastCommitMessage()
     emit sgnSended(QString("%1 %2").arg(settings_.gitPath).arg(params.join(" ")));
 }
 
+void GitRepository::readCurrentFile(QString filepath)
+{
+    auto dir = getWorkingDir();
+    QFile currentFile(dir.absoluteFilePath(filepath));
+    if (currentFile.exists() == false)
+        return;
+
+    currentFile.open(QIODevice::OpenModeFlag::ReadOnly);
+    QString data = currentFile.readAll();
+    currentFile.close();
+    emit sgnCurrentFileReaded(filepath, data);
+}
+
+void GitRepository::readStagedOrCommitedFile(QString filepath)
+{
+    if (watcher_)
+        watcher_->cancel();
+    if (future_.isRunning())
+        future_.cancel();
+
+    currentCommand_ = GIT_COMMAND::SHOW;
+    auto params = git_->makeShowCommand(filepath);
+
+    future_ = QtConcurrent::run(git_,
+                                &Git::execute,
+                                getWorkingDir().absolutePath(),
+                                settings_.gitPath,
+                                params);
+    watcher_->setFuture(future_);
+    emit sgnSended(QString("%1 %2").arg(settings_.gitPath).arg(params.join(" ")));
+}
+
 void GitRepository::onStarted()
 {
     qDebug() << "onStarted";
@@ -125,6 +157,9 @@ void GitRepository::onResultReadyAt(int resultIndex)
     }
     if (currentCommand_ == GIT_COMMAND::LAST_MESSAGE) {
         proccessLastMessage(text);
+    }
+    if (currentCommand_ == GIT_COMMAND::SHOW) {
+        proccessShowFileMessage(text);
     }
 
     currentCommand_ = GIT_COMMAND::NO;
@@ -176,4 +211,9 @@ QVector<GitFile> GitRepository::proccessGitStatus(QString data) {
 void GitRepository::proccessLastMessage(QString text)
 {
     emit sgnLastMessageReady(text.mid(8));
+}
+
+void GitRepository::proccessShowFileMessage(QString data)
+{
+    emit sgnOriginalFileReaded(data);
 }

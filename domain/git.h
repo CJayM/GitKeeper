@@ -14,6 +14,7 @@ public:
     QStringList makeStatusCommand() const;
     QStringList makeCommitCommand(QString message, bool isAmend) const;
     QStringList makeLastCommitMessageCommand() const;
+    QStringList makeShowCommand(QString filepath) const;
 
 signals:
 
