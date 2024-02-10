@@ -44,6 +44,7 @@ private slots:
   void onSaveSettings();
   void onCommitTextChanged();
   void onAmnedChecked(bool checked);
+  void onCurrentFileVScrollBarChanged(int value);
 
   private:
   Ui::MainWindow *ui;

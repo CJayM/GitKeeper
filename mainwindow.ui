@@ -141,7 +141,7 @@
               </property>
               <widget class="QTextEdit" name="originalFileEdit">
                <property name="enabled">
-                <bool>false</bool>
+                <bool>true</bool>
                </property>
                <property name="readOnly">
                 <bool>true</bool>

@@ -8,6 +8,7 @@
 #include <QAction>
 #include <QDebug>
 #include <QDir>
+#include <QScrollBar>
 #include <QSettings>
 #include <QTableView>
 
@@ -51,6 +52,11 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     connect(ui->btnClearLog, &QAbstractButton::clicked, this, [&]() { ui->logMessage->clear(); });
     connect(ui->commitMessageEdit, &QTextEdit::textChanged, this, &MainWindow::onCommitTextChanged);
     connect(ui->amendCheckBox, &QCheckBox::toggled, this, &MainWindow::onAmnedChecked);
+
+    connect(ui->currentFileEdit->verticalScrollBar(),
+            &QScrollBar::valueChanged,
+            this,
+            &MainWindow::onCurrentFileVScrollBarChanged);
 
     gitRepository_ = new GitRepository(settings_, this);
     gitRepository_->setWorkingDir(QDir("D:\\develop\\git_keeper\\GitKeeper"));
@@ -156,6 +162,13 @@ void MainWindow::onAmnedChecked(bool checked)
 
     gitRepository_->requestLastCommitMessage();
     //    ui->commitMessageEdit->setPlainText(lastCommitMessage_);
+}
+
+void MainWindow::onCurrentFileVScrollBarChanged(int value)
+{
+    qDebug() << "Changed" << value;
+    auto scrollBar = ui->originalFileEdit->verticalScrollBar();
+    scrollBar->setValue(value);
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)
