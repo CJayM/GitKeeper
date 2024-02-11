@@ -22,6 +22,7 @@ class GitFilesModel;
 class GitRepository;
 
 class SettingsDialog;
+class Highlighter;
 
 class MainWindow : public QMainWindow {
   Q_OBJECT
@@ -60,6 +61,8 @@ private slots:
 
   SettingsDialog *settingsDialog_ = nullptr;
   AppSettings settings_;
+  Highlighter *highlighter_ = nullptr;
+  Highlighter *highlighterLeft_ = nullptr;
 
   // QWidget interface
 protected:

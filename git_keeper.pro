@@ -9,6 +9,7 @@ SOURCES += \
     domain/git.cpp \
     domain/git_file.cpp \
     domain/git_repository.cpp \
+    highlighter.cpp \
     main.cpp \
     mainwindow.cpp \
     models/git_files_model.cpp \
@@ -19,6 +20,7 @@ HEADERS += \
     domain/git.h \
     domain/git_file.h \
     domain/git_repository.h \
+    highlighter.h \
     mainwindow.h \
     models/git_files_model.h \
     settings_dialog.h

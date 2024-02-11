@@ -1,4 +1,5 @@
 #include "mainwindow.h"
+#include "highlighter.h"
 #include "settings_dialog.h"
 
 #include "domain/git_file.h"
@@ -53,6 +54,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     connect(ui->commitMessageEdit, &QTextEdit::textChanged, this, &MainWindow::onCommitTextChanged);
     connect(ui->amendCheckBox, &QCheckBox::toggled, this, &MainWindow::onAmnedChecked);
 
+    highlighter_ = new Highlighter(ui->currentFileEdit->document());
+    highlighterLeft_ = new Highlighter(ui->originalFileEdit->document());
     connect(ui->currentFileEdit->verticalScrollBar(),
             &QScrollBar::valueChanged,
             this,
