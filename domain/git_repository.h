@@ -11,7 +11,7 @@
 
 class Git;
 
-enum class GIT_COMMAND { NO, COMMIT, STATUS, LAST_MESSAGE, SHOW };
+enum class GIT_COMMAND { NO, COMMIT, STATUS, LAST_MESSAGE };
 
 class GitRepository : public QObject
 {
@@ -24,8 +24,7 @@ public:
     void status();
     void commit(QString message, bool isAmend);
     void requestLastCommitMessage();
-    void readCurrentFile(QString filepath);
-    void readStagedOrCommitedFile(QString filepath);
+    void onSelectFile(QString filepath);
 
 signals:
     void sgnSended(QString data);
@@ -35,7 +34,8 @@ signals:
     void sgnFinished();
     void sgnLastMessageReady(QString msg);
     void sgnCurrentFileReaded(QString filepath, QString data);
-    void sgnOriginalFileReaded(QString data);
+    void sgnOriginalFileReaded(QString filepath, QString data);
+    void sgnDiffReaded(QString filepath, QString data);
 
 private slots:
   void onFutureProgress(int progressValue);
@@ -54,5 +54,7 @@ private slots:
 
   QVector<GitFile> proccessGitStatus(QString data);
   void proccessLastMessage(QString text);
-  void proccessShowFileMessage(QString text);
+  QFuture<std::pair<QString, QString>> readCurrentFile(QString filepath);
+  QFuture<std::pair<QString, QString>> readStagedOrCommitedFile(QString filepath);
+  QFuture<std::pair<QString, QString>> readDiffFile(QString filepath);
 };

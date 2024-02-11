@@ -15,6 +15,7 @@ public:
     QStringList makeCommitCommand(QString message, bool isAmend) const;
     QStringList makeLastCommitMessageCommand() const;
     QStringList makeShowCommand(QString filepath) const;
+    QStringList makeShowDiffCommand(QString filepath) const;
 
 signals:
 

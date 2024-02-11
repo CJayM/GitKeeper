@@ -67,6 +67,15 @@ QStringList Git::makeShowCommand(QString filepath) const
 {
     QStringList result;
     result << "show"
-           << "HEAD^^^:" + filepath;
+           << "HEAD:" + filepath;
+    return result;
+}
+
+QStringList Git::makeShowDiffCommand(QString filepath) const
+{
+    QStringList result;
+    result << "diff"
+           << "--no-color"
+           << "-U0" << filepath;
     return result;
 }

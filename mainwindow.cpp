@@ -81,6 +81,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
             &GitRepository::sgnOriginalFileReaded,
             this,
             &MainWindow::onOriginalFileReaded);
+    connect(gitRepository_, &GitRepository::sgnDiffReaded, this, &MainWindow::onDiffReaded);
 
     gitRepository_->status();
 }
@@ -108,8 +109,7 @@ void MainWindow::onCurrentFileChanged(const QModelIndex &current,
 
   QDir dir(path);
   auto filepath = dir.filePath(file);
-  gitRepository_->readStagedOrCommitedFile(filepath);
-  gitRepository_->readCurrentFile(filepath);
+  gitRepository_->onSelectFile(filepath);
 }
 
 void MainWindow::onStatusAction() {  
@@ -190,9 +190,82 @@ void MainWindow::onCurrentFileReaded(QString filepath, QString data)
     ui->currentFileEdit->setText(data);
 }
 
-void MainWindow::onOriginalFileReaded(QString data)
+void MainWindow::onOriginalFileReaded(QString filepath, QString data)
 {
     ui->originalFileEdit->setText(data);
+}
+
+void MainWindow::onDiffReaded(QString filepath, QString data)
+{
+    QStringList forLeft;
+    QStringList forRight;
+    for (const auto &line : data.split("\n"))
+        qDebug() << line;
+    for (const auto &line : data.split("\n")) {
+        if (line.startsWith("@@") == false)
+            continue;
+        auto newLine = line.mid(4);
+        auto parts = newLine.split("@@");
+        auto digits = parts.first().split("+");
+        forLeft << digits[0];
+        forRight << digits[1];
+    }
+
+    fillLeft(forLeft);
+    fillRight(forRight);
+}
+
+void MainWindow::fillLeft(const QStringList &texts)
+{
+    QList<QTextEdit::ExtraSelection> sels;
+    auto document = ui->originalFileEdit->document();
+    for (const auto &text : texts) {
+        auto parts = text.trimmed().split(",");
+        auto from = parts.first().toInt();
+        int count = 1;
+        if (parts.size() == 2)
+            count = parts.at(1).toInt();
+
+        for (int i = from - 1; i < from + count - 1; ++i) {
+            QTextEdit::ExtraSelection selection;
+            selection.format.setBackground(QBrush(QColor(Qt::yellow).lighter(160)));
+            selection.format.setProperty(QTextFormat::FullWidthSelection, true);
+            selection.cursor = QTextCursor(document);
+            auto block = document->findBlockByLineNumber(i);
+            selection.cursor.setPosition(block.position());
+            selection.cursor.select(QTextCursor::LineUnderCursor);
+            sels << selection;
+        }
+    }
+
+    ui->originalFileEdit->setExtraSelections(sels);
+}
+
+void MainWindow::fillRight(const QStringList &texts)
+{
+    qDebug() << texts;
+    QList<QTextEdit::ExtraSelection> sels;
+    auto document = ui->currentFileEdit->document();
+    for (const auto &text : texts) {
+        auto parts = text.trimmed().split(",");
+        auto from = parts.first().toInt();
+        int count = 1;
+        if (parts.size() == 2)
+            count = parts.at(1).toInt();
+
+        for (int i = from - 1; i < from + count - 1; ++i) {
+            QTextEdit::ExtraSelection selection;
+            selection.format.setBackground(QBrush(QColor(Qt::yellow).lighter(160)));
+            selection.format.setProperty(QTextFormat::FullWidthSelection, true);
+            selection.cursor = QTextCursor(document);
+            auto block = document->findBlockByLineNumber(i);
+            selection.cursor.setPosition(block.position());
+            selection.cursor.select(QTextCursor::LineUnderCursor);
+            sels << selection;
+        }
+    }
+
+    ui->currentFileEdit->setExtraSelections(sels);
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)

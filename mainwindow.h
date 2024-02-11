@@ -47,7 +47,8 @@ private slots:
   void onAmnedChecked(bool checked);
   void onCurrentFileVScrollBarChanged(int value);
   void onCurrentFileReaded(QString filepath, QString data);
-  void onOriginalFileReaded(QString data);
+  void onOriginalFileReaded(QString filepath, QString data);
+  void onDiffReaded(QString filepath, QString data);
 
   private:
   Ui::MainWindow *ui;
@@ -63,6 +64,9 @@ private slots:
   AppSettings settings_;
   Highlighter *highlighter_ = nullptr;
   Highlighter *highlighterLeft_ = nullptr;
+
+  void fillLeft(const QStringList &texts);
+  void fillRight(const QStringList &texts);
 
   // QWidget interface
 protected:

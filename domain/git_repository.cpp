@@ -101,36 +101,66 @@ void GitRepository::requestLastCommitMessage()
     emit sgnSended(QString("%1 %2").arg(settings_.gitPath).arg(params.join(" ")));
 }
 
-void GitRepository::readCurrentFile(QString filepath)
+QFuture<std::pair<QString, QString>> GitRepository::readCurrentFile(QString filepath)
 {
-    auto dir = getWorkingDir();
-    QFile currentFile(dir.absoluteFilePath(filepath));
-    if (currentFile.exists() == false)
-        return;
+    return QtConcurrent::run([&]() {
+        auto dir = getWorkingDir();
+        QFile currentFile(dir.absoluteFilePath(filepath));
+        if (currentFile.exists() == false)
+            return std::make_pair(filepath, QString());
 
-    currentFile.open(QIODevice::OpenModeFlag::ReadOnly);
-    QString data = currentFile.readAll();
-    currentFile.close();
-    emit sgnCurrentFileReaded(filepath, data);
+        currentFile.open(QIODevice::OpenModeFlag::ReadOnly);
+        QString data = currentFile.readAll();
+        currentFile.close();
+        return std::make_pair(filepath, data);
+    });
 }
 
-void GitRepository::readStagedOrCommitedFile(QString filepath)
+QFuture<std::pair<QString, QString>> GitRepository::readStagedOrCommitedFile(QString filepath)
 {
-    if (watcher_)
-        watcher_->cancel();
-    if (future_.isRunning())
-        future_.cancel();
+    return QtConcurrent::run([&]() {
+        auto params = git_->makeShowCommand(filepath);
+        auto localFuture = QtConcurrent::run(git_,
+                                             &Git::execute,
+                                             getWorkingDir().absolutePath(),
+                                             settings_.gitPath,
+                                             params);
+        localFuture.waitForFinished();
+        return std::make_pair(filepath, localFuture.result().result.join("\n"));
+    });
+}
 
-    currentCommand_ = GIT_COMMAND::SHOW;
-    auto params = git_->makeShowCommand(filepath);
+QFuture<std::pair<QString, QString>> GitRepository::readDiffFile(QString filepath)
+{
+    return QtConcurrent::run([&]() {
+        auto params = git_->makeShowDiffCommand(filepath);
+        auto localFuture = QtConcurrent::run(git_,
+                                             &Git::execute,
+                                             getWorkingDir().absolutePath(),
+                                             settings_.gitPath,
+                                             params);
+        localFuture.waitForFinished();
+        return std::make_pair(filepath, localFuture.result().result.join("\n"));
+    });
+}
 
-    future_ = QtConcurrent::run(git_,
-                                &Git::execute,
-                                getWorkingDir().absolutePath(),
-                                settings_.gitPath,
-                                params);
-    watcher_->setFuture(future_);
-    emit sgnSended(QString("%1 %2").arg(settings_.gitPath).arg(params.join(" ")));
+void GitRepository::onSelectFile(QString filepath)
+{
+    QtConcurrent::run(
+        [&](QString filepath) {
+            auto future1 = readStagedOrCommitedFile(filepath);
+            auto future2 = readCurrentFile(filepath);
+            auto future3 = readDiffFile(filepath);
+
+            future1.waitForFinished();
+            future2.waitForFinished();
+            future3.waitForFinished();
+
+            emit sgnCurrentFileReaded(filepath, future2.result().second);
+            emit sgnOriginalFileReaded(filepath, future1.result().second);
+            emit sgnDiffReaded(filepath, future3.result().second);
+        },
+        filepath);
 }
 
 void GitRepository::onStarted()
@@ -157,9 +187,6 @@ void GitRepository::onResultReadyAt(int resultIndex)
     }
     if (currentCommand_ == GIT_COMMAND::LAST_MESSAGE) {
         proccessLastMessage(text);
-    }
-    if (currentCommand_ == GIT_COMMAND::SHOW) {
-        proccessShowFileMessage(text);
     }
 
     currentCommand_ = GIT_COMMAND::NO;
@@ -211,9 +238,4 @@ QVector<GitFile> GitRepository::proccessGitStatus(QString data) {
 void GitRepository::proccessLastMessage(QString text)
 {
     emit sgnLastMessageReady(text.mid(8));
-}
-
-void GitRepository::proccessShowFileMessage(QString data)
-{
-    emit sgnOriginalFileReaded(data);
 }
