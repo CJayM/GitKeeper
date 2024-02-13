@@ -23,6 +23,7 @@ class GitRepository;
 
 class SettingsDialog;
 class Highlighter;
+class QSplashScreen;
 
 class MainWindow : public QMainWindow {
   Q_OBJECT
@@ -42,6 +43,7 @@ private slots:
   void onReceivedLastMessage(QString data);
   void onGitStatusFinished(QVector<GitFile> files);
   void onOpenSettingsDialog();
+  void onShowAbout();
   void onSaveSettings();
   void onCommitTextChanged();
   void onAmnedChecked(bool checked);
@@ -59,6 +61,7 @@ private slots:
   QString lastCommitMessage_ = "Amned text placed";
 
   Git *git_ = nullptr;
+  QSplashScreen *splash_ = nullptr;
 
   SettingsDialog *settingsDialog_ = nullptr;
   AppSettings settings_;
