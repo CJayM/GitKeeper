@@ -11,6 +11,7 @@
 #include <QDir>
 #include <QScrollBar>
 #include <QSettings>
+#include <QSplashScreen>
 #include <QTableView>
 
 #include "domain/git_repository.h"
@@ -44,9 +45,13 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
             this,
             &MainWindow::onCurrentFileChanged);
 
+    QPixmap pixmap(":/resources/splash.png");
+    splash_ = new QSplashScreen(this, pixmap);
+
     connect(ui->actionStatus, &QAction::triggered, this, &MainWindow::onStatusAction);
     connect(ui->actionCommit, &QAction::triggered, this, &MainWindow::onCommitAction);
     connect(ui->actionOpenSettings, &QAction::triggered, this, &MainWindow::onOpenSettingsDialog);
+    connect(ui->aboutAction, &QAction::triggered, this, &MainWindow::onShowAbout);
 
     ui->btnCommit->setDefaultAction(ui->actionCommit);
 
@@ -150,6 +155,12 @@ void MainWindow::onOpenSettingsDialog()
 {
     settingsDialog_->loadSettings(settings_);
     settingsDialog_->show();
+}
+
+void MainWindow::onShowAbout()
+{
+    splash_->show();
+    splash_->showMessage(QString("Version %1").arg(APP_VERSION), Qt::AlignLeft, Qt::white);
 }
 
 void MainWindow::onSaveSettings()

@@ -1,7 +1,17 @@
 QT       += core gui widgets
 
+TARGET = GitKeeper
+TEMPLATE = app
 
 CONFIG += c++14
+CONFIG += separate_debug_info
+
+VERSION = 0.1
+DEFINES += APP_VERSION=\\\"$$VERSION\\\"
+DEFINES += APP_NAME=\\\"GitKeeper\\\"
+DEFINES += APP_DOMAIN=\\\"jay\\\"
+
+RC_ICONS = resources/app_icon_64.ico
 
 
 SOURCES += \
@@ -38,3 +48,6 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 DISTFILES += \
 	todo.md
+
+RESOURCES += \
+    app_resorces.qrc
