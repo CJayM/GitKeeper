@@ -4,9 +4,9 @@
 #include <QModelIndex>
 #include <QProcess>
 
-#include <domain/git_file.h>
-
+#include "diff.h"
 #include "domain/git.h"
+#include "domain/git_file.h"
 
 #include "app_settings.h"
 
@@ -65,8 +65,9 @@ private slots:
   Highlighter *highlighter_ = nullptr;
   Highlighter *highlighterLeft_ = nullptr;
 
-  void fillLeft(const QStringList &texts);
-  void fillRight(const QStringList &texts);
+  void colorize();
+
+  QVector<DiffOepration> operations_;
 
   // QWidget interface
 protected:

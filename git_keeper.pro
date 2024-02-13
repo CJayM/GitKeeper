@@ -6,6 +6,7 @@ CONFIG += c++14
 
 SOURCES += \
     app_settings.cpp \
+    diff.cpp \
     domain/git.cpp \
     domain/git_file.cpp \
     domain/git_repository.cpp \
@@ -17,6 +18,7 @@ SOURCES += \
 
 HEADERS += \
     app_settings.h \
+    diff.h \
     domain/git.h \
     domain/git_file.h \
     domain/git_repository.h \
