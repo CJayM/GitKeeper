@@ -22,11 +22,17 @@ protected:
 
 private slots:
     void updateLineNumberAreaWidth(int newBlockCount);
-    void highlightCurrentLine();
     void updateLineNumberArea(const QRect &rect, int dy);
 
 private:
     QWidget *lineNumberArea_;
     QVector<DiffPos> diffBlocks_;
-    QList<QTextEdit::ExtraSelection> diffSelections_;
+
+    // QPlainTextEdit interface
+protected:
+    void paintEvent(QPaintEvent *e) override;
+
+    // QPaintDevice interface
+
+    // QPaintDevice interface
 };
