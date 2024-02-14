@@ -1,4 +1,5 @@
 #include "mainwindow.h"
+#include "code_editor.h"
 #include "highlighter.h"
 #include "settings_dialog.h"
 
@@ -198,12 +199,12 @@ void MainWindow::onCurrentFileVScrollBarChanged(int value)
 
 void MainWindow::onCurrentFileReaded(QString filepath, QString data)
 {
-    ui->currentFileEdit->setText(data);
+    ui->currentFileEdit->setPlainText(data);
 }
 
 void MainWindow::onOriginalFileReaded(QString filepath, QString data)
 {
-    ui->originalFileEdit->setText(data);
+    ui->originalFileEdit->setPlainText(data);
 }
 
 void MainWindow::onDiffReaded(QString filepath, QString data)
@@ -239,62 +240,12 @@ void MainWindow::onDiffReaded(QString filepath, QString data)
 
 void MainWindow::colorize()
 {
-    QList<QTextEdit::ExtraSelection> selsLeft;
     QList<QTextEdit::ExtraSelection> selsRight;
-    auto documentLeft = ui->originalFileEdit->document();
-    auto documentRight = ui->currentFileEdit->document();
 
     for (const auto &oper : qAsConst(operations_)) {
-        if (oper.type == DiffOperationType::REMOVE) {
-            for (int i = oper.left.line - 1; i < oper.left.line + oper.left.count - 1; ++i) {
-                QTextEdit::ExtraSelection selection;
-                selection.format.setBackground(QBrush(QColor(Qt::red).lighter(160)));
-                selection.format.setProperty(QTextFormat::FullWidthSelection, true);
-                selection.cursor = QTextCursor(documentLeft);
-                auto block = documentLeft->findBlockByLineNumber(i);
-                selection.cursor.setPosition(block.position());
-                selection.cursor.select(QTextCursor::LineUnderCursor);
-                selsLeft << selection;
-            }
-        }
-        if (oper.type == DiffOperationType::REPLACE) {
-            for (int i = oper.left.line - 1; i < oper.left.line + oper.left.count - 1; ++i) {
-                QTextEdit::ExtraSelection selection;
-                selection.format.setBackground(QBrush(QColor(Qt::blue).lighter(160)));
-                selection.format.setProperty(QTextFormat::FullWidthSelection, true);
-                selection.cursor = QTextCursor(documentLeft);
-                auto block = documentLeft->findBlockByLineNumber(i);
-                selection.cursor.setPosition(block.position());
-                selection.cursor.select(QTextCursor::LineUnderCursor);
-                selsLeft << selection;
-            }
-            for (int i = oper.right.line - 1; i < oper.right.line + oper.right.count - 1; ++i) {
-                QTextEdit::ExtraSelection selection;
-                selection.format.setBackground(QBrush(QColor(Qt::green).lighter(160)));
-                selection.format.setProperty(QTextFormat::FullWidthSelection, true);
-                selection.cursor = QTextCursor(documentRight);
-                auto block = documentRight->findBlockByLineNumber(i);
-                selection.cursor.setPosition(block.position());
-                selection.cursor.select(QTextCursor::LineUnderCursor);
-                selsRight << selection;
-            }
-        }
-        if (oper.type == DiffOperationType::ADD) {
-            for (int i = oper.right.line - 1; i < oper.right.line + oper.right.count - 1; ++i) {
-                QTextEdit::ExtraSelection selection;
-                selection.format.setBackground(QBrush(QColor(Qt::green).lighter(160)));
-                selection.format.setProperty(QTextFormat::FullWidthSelection, true);
-                selection.cursor = QTextCursor(documentRight);
-                auto block = documentRight->findBlockByLineNumber(i);
-                selection.cursor.setPosition(block.position());
-                selection.cursor.select(QTextCursor::LineUnderCursor);
-                selsRight << selection;
-            }
-        }
+        ui->originalFileEdit->addDiffBlock(oper.left);
+        ui->currentFileEdit->addDiffBlock(oper.right);
     }
-
-    ui->originalFileEdit->setExtraSelections(selsLeft);
-    ui->currentFileEdit->setExtraSelections(selsRight);
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)

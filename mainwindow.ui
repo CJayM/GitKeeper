@@ -145,7 +145,7 @@
               <property name="handleWidth">
                <number>4</number>
               </property>
-              <widget class="QTextEdit" name="originalFileEdit">
+              <widget class="CodeEditor" name="originalFileEdit">
                <property name="enabled">
                 <bool>true</bool>
                </property>
@@ -153,7 +153,7 @@
                 <bool>true</bool>
                </property>
               </widget>
-              <widget class="QTextEdit" name="currentFileEdit">
+              <widget class="CodeEditor" name="currentFileEdit">
                <property name="readOnly">
                 <bool>true</bool>
                </property>
@@ -413,6 +413,13 @@
    </property>
   </action>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>CodeEditor</class>
+   <extends>QPlainTextEdit</extends>
+   <header location="global">code_editor.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>
