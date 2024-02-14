@@ -16,7 +16,7 @@ RC_ICONS = resources/app_icon_64.ico
 
 SOURCES += \
     app_settings.cpp \
-    code_editor.cpp \
+    widgets/code_editor.cpp \
     diff.cpp \
     domain/git.cpp \
     domain/git_file.cpp \
@@ -29,7 +29,7 @@ SOURCES += \
 
 HEADERS += \
     app_settings.h \
-    code_editor.h \
+    widgets/code_editor.h \
     diff.h \
     domain/git.h \
     domain/git_file.h \

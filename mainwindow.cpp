@@ -1,7 +1,7 @@
 #include "mainwindow.h"
-#include "code_editor.h"
 #include "highlighter.h"
 #include "settings_dialog.h"
+#include "widgets/code_editor.h"
 
 #include "domain/git_file.h"
 #include "models/git_files_model.h"
