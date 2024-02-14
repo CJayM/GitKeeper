@@ -5,21 +5,6 @@
 #include <QPlainTextEdit>
 #include <QWidget>
 
-class CodeEditor;
-
-class LineNumberArea : public QWidget
-{
-public:
-    LineNumberArea(CodeEditor *editor);
-    QSize sizeHint() const override;
-
-protected:
-    void paintEvent(QPaintEvent *event) override;
-
-private:
-    CodeEditor *codeEditor_ = nullptr;
-};
-
 class CodeEditor : public QPlainTextEdit
 {
     Q_OBJECT

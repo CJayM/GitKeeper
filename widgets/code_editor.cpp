@@ -1,4 +1,5 @@
 #include "code_editor.h"
+#include "line_number_area.h"
 
 #include <QFont>
 #include <QPaintEvent>
@@ -134,16 +135,4 @@ void CodeEditor::updateLineNumberArea(const QRect &rect, int dy)
 
     if (rect.contains(viewport()->rect()))
         updateLineNumberAreaWidth(0);
-}
-
-LineNumberArea::LineNumberArea(CodeEditor *editor) : QWidget(editor), codeEditor_(editor) {}
-
-QSize LineNumberArea::sizeHint() const
-{
-    return QSize(codeEditor_->lineNumberAreaWidth(), 0);
-}
-
-void LineNumberArea::paintEvent(QPaintEvent *event)
-{
-    codeEditor_->lineNumberAreaPaintEvent(event);
 }

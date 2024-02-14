@@ -25,7 +25,8 @@ SOURCES += \
     main.cpp \
     mainwindow.cpp \
     models/git_files_model.cpp \
-    settings_dialog.cpp
+    settings_dialog.cpp \
+    widgets/line_number_area.cpp
 
 HEADERS += \
     app_settings.h \
@@ -37,7 +38,8 @@ HEADERS += \
     highlighter.h \
     mainwindow.h \
     models/git_files_model.h \
-    settings_dialog.h
+    settings_dialog.h \
+    widgets/line_number_area.h
 
 FORMS += \
     mainwindow.ui \
