@@ -1,3 +1,5 @@
+#include <QVector>
+
 #pragma once
 
 enum class DiffOperationType { UNKNOWN = 0, REMOVE, ADD, REPLACE, NOTHINK };
@@ -15,4 +17,12 @@ struct DiffOepration
     DiffPos right;
 };
 
-void recognizeOperationType(DiffOepration &oper);
+class Diffs
+{
+public:
+    QVector<DiffOperation> operations;
+    void clear();
+    void append(DiffOperation oper);
+};
+
+void recognizeOperationType(DiffOperation &oper);

@@ -18,3 +18,13 @@ void recognizeOperationType(DiffOepration &oper)
     oper.right.type = DiffOperationType::ADD;
     return;
 }
+
+void Diffs::clear()
+{
+    operations.clear();
+}
+
+void Diffs::append(DiffOperation oper)
+{
+    operations.append(oper);
+}

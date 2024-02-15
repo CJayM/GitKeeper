@@ -70,7 +70,7 @@ private slots:
 
   void colorize();
 
-  QVector<DiffOepration> operations_;
+  Diffs diffs_;
 
   // QWidget interface
 protected:

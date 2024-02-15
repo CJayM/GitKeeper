@@ -208,7 +208,8 @@ void MainWindow::onOriginalFileReaded(QString filepath, QString data)
 
 void MainWindow::onDiffReaded(QString filepath, QString data)
 {
-    operations_.clear();
+    diffs_.clear();
+
     for (const auto &line : data.split("\n"))
         qDebug() << line;
     for (const auto &line : data.split("\n")) {
@@ -231,7 +232,8 @@ void MainWindow::onDiffReaded(QString filepath, QString data)
         oper.right.line = rightParts[0].toInt();
         oper.right.count = rightParts[1].toInt();
         recognizeOperationType(oper);
-        operations_.append(oper);
+
+        diffs_.append(oper);
     }
 
     colorize();
@@ -241,7 +243,7 @@ void MainWindow::colorize()
 {
     QList<QTextEdit::ExtraSelection> selsRight;
 
-    for (const auto &oper : qAsConst(operations_)) {
+    for (const auto &oper : qAsConst(diffs_.operations)) {
         ui->originalFileEdit->addDiffBlock(oper.left);
         ui->currentFileEdit->addDiffBlock(oper.right);
     }
