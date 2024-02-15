@@ -65,6 +65,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
             &QScrollBar::valueChanged,
             this,
             &MainWindow::onCurrentFileVScrollBarChanged);
+    connect(ui->originalFileEdit->verticalScrollBar(),
+            &QScrollBar::valueChanged,
+            this,
+            &MainWindow::onOriginalFileVScrollBarChanged);
 
     gitRepository_ = new GitRepository(settings_, this);
     gitRepository_->setWorkingDir(QDir("D:\\develop\\git_keeper\\GitKeeper"));
@@ -192,8 +196,20 @@ void MainWindow::onAmnedChecked(bool checked)
 
 void MainWindow::onCurrentFileVScrollBarChanged(int value)
 {
+    qDebug() << "Scroll A" << value;
+    ui->currentFileEdit->blockSignals(true);
     auto scrollBar = ui->originalFileEdit->verticalScrollBar();
     scrollBar->setValue(value);
+    ui->currentFileEdit->blockSignals(false);
+}
+
+void MainWindow::onOriginalFileVScrollBarChanged(int value)
+{
+    qDebug() << "Scroll B" << value;
+    ui->originalFileEdit->blockSignals(true);
+    auto scrollBar = ui->currentFileEdit->verticalScrollBar();
+    scrollBar->setValue(value);
+    ui->originalFileEdit->blockSignals(false);
 }
 
 void MainWindow::onCurrentFileReaded(QString filepath, QString data)

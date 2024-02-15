@@ -48,6 +48,7 @@ private slots:
   void onCommitTextChanged();
   void onAmnedChecked(bool checked);
   void onCurrentFileVScrollBarChanged(int value);
+  void onOriginalFileVScrollBarChanged(int value);
   void onCurrentFileReaded(QString filepath, QString data);
   void onOriginalFileReaded(QString filepath, QString data);
   void onDiffReaded(QString filepath, QString data);
