@@ -1,6 +1,6 @@
 #include "diff.h"
 
-void recognizeOperationType(DiffOepration &oper)
+void recognizeOperationType(DiffOperation &oper)
 {
     if (oper.left.count > 0 && oper.right.count == 0) {
         oper.left.type = DiffOperationType::REMOVE;

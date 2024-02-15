@@ -11,7 +11,7 @@ struct DiffPos
     DiffOperationType type;
 };
 
-struct DiffOepration
+struct DiffOperation
 {
     DiffPos left;
     DiffPos right;

@@ -226,7 +226,7 @@ void MainWindow::onDiffReaded(QString filepath, QString data)
         if (rightParts.size() == 1)
             rightParts << "1";
 
-        DiffOepration oper;
+        DiffOperation oper;
         oper.left.line = leftParts[0].toInt();
         oper.left.count = leftParts[1].toInt();
         oper.right.line = rightParts[0].toInt();
