@@ -10,8 +10,7 @@ void AppSettings::load()
 
     splitter_2_state = settings.value("splitter_2_state").toByteArray();
     splitter_4_state = settings.value("splitter_4_state").toByteArray();
-    splitter_state = settings.value("splitter_state").toByteArray();
-    splitter_3_state = settings.value("splitter_3_state").toByteArray();
+    splitter_state = settings.value("splitter_state").toByteArray();    
 }
 
 void AppSettings::save() const
@@ -22,6 +21,5 @@ void AppSettings::save() const
 
     settings.setValue("splitter_2_state", splitter_2_state);
     settings.setValue("splitter_4_state", splitter_4_state);
-    settings.setValue("splitter_state", splitter_state);
-    settings.setValue("splitter_3_state", splitter_3_state);
+    settings.setValue("splitter_state", splitter_state);    
 }

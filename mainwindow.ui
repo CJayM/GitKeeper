@@ -138,26 +138,41 @@
              <property name="orientation">
               <enum>Qt::Vertical</enum>
              </property>
-             <widget class="QSplitter" name="splitter_3">
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
-              </property>
-              <property name="handleWidth">
-               <number>4</number>
-              </property>
-              <widget class="CodeEditor" name="originalFileEdit">
-               <property name="enabled">
-                <bool>true</bool>
+             <widget class="QWidget" name="splitter_3" native="true">
+              <layout class="QHBoxLayout" name="horizontalLayout_3">
+               <property name="spacing">
+                <number>2</number>
                </property>
-               <property name="readOnly">
-                <bool>true</bool>
+               <property name="leftMargin">
+                <number>2</number>
                </property>
-              </widget>
-              <widget class="CodeEditor" name="currentFileEdit">
-               <property name="readOnly">
-                <bool>true</bool>
+               <property name="topMargin">
+                <number>2</number>
                </property>
-              </widget>
+               <property name="rightMargin">
+                <number>2</number>
+               </property>
+               <property name="bottomMargin">
+                <number>2</number>
+               </property>
+               <item>
+                <widget class="CodeEditor" name="originalFileEdit">
+                 <property name="enabled">
+                  <bool>true</bool>
+                 </property>
+                 <property name="readOnly">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="CodeEditor" name="currentFileEdit">
+                 <property name="readOnly">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+              </layout>
              </widget>
              <widget class="QTabWidget" name="tabWidget">
               <property name="currentIndex">
