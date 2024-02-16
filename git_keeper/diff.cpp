@@ -31,6 +31,7 @@ void Diffs::append(DiffOperation oper)
 
 int Diffs::getMappedPos(int pos) const
 {
+    return pos;
     int leftMin = 0;
     int leftMax = pos;
     int rightMin = 0;

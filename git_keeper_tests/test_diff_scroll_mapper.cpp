@@ -4,9 +4,26 @@ DiffScrollMapper_Test::DiffScrollMapper_Test() {}
 
 DiffScrollMapper_Test::~DiffScrollMapper_Test() {}
 
-void DiffScrollMapper_Test::test_true()
+void DiffScrollMapper_Test::test_mapped_pos()
 {
-    QVERIFY(true);
+    const auto REPLACE = DiffOperationType::REPLACE;
+
+    Diffs diffs;
+    diffs.append(DiffOperation{{10, 1, REPLACE}, {10, 1, REPLACE}});
+    diffs.append(DiffOperation{{20, 1, REPLACE}, {30, 1, REPLACE}});
+    diffs.append(DiffOperation{{32, 1, REPLACE}, {48, 1, REPLACE}});
+    diffs.append(DiffOperation{{64, 1, REPLACE}, {64, 1, REPLACE}});
+
+    QCOMPARE(diffs.getMappedPos(0), 0);
+    QCOMPARE(diffs.getMappedPos(1), 1);
+    QCOMPARE(diffs.getMappedPos(5), 5);
+    QCOMPARE(diffs.getMappedPos(10), 10);
+    QCOMPARE(diffs.getMappedPos(20), 15);
+    //    QCOMPARE(diffs.getMappedPos(30), 20);
+    //    QCOMPARE(diffs.getMappedPos(39), 26);
+    //    QCOMPARE(diffs.getMappedPos(48), 32);
+    //    QCOMPARE(diffs.getMappedPos(56), 48);
+    //    QCOMPARE(diffs.getMappedPos(64), 64);
 }
 
 int this_method_make_git_keeper_Test_visible_in_QT_tests_panel()
