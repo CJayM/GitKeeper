@@ -28,3 +28,31 @@ void Diffs::append(DiffOperation oper)
 {
     operations.append(oper);
 }
+
+int Diffs::getMappedPos(int pos) const
+{
+    int leftMin = 0;
+    int leftMax = pos;
+    int rightMin = 0;
+    int rightMax = pos;
+
+    for (const auto &oper : operations) {
+        if (pos > oper.right.line) {
+            rightMin = oper.right.line;
+            leftMin = oper.left.line;
+        }
+
+        if (pos < oper.right.line) {
+            rightMax = oper.right.line + oper.right.count;
+            leftMax = oper.left.line + oper.left.count;
+            break;
+        }
+    }
+
+    float percent = 1.0;
+    if (rightMax != rightMin)
+        percent = (pos - rightMin) / (rightMax - rightMin);
+    float result = (leftMax - leftMin) * percent + leftMin;
+
+    return int(result);
+}

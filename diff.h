@@ -23,6 +23,7 @@ public:
     QVector<DiffOperation> operations;
     void clear();
     void append(DiffOperation oper);
+    int getMappedPos(int pos) const;
 };
 
 void recognizeOperationType(DiffOperation &oper);

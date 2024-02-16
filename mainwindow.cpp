@@ -196,16 +196,17 @@ void MainWindow::onAmnedChecked(bool checked)
 
 void MainWindow::onCurrentFileVScrollBarChanged(int value)
 {
-    qDebug() << "Scroll A" << value;
+    qDebug() << "Scroll B" << value;
     ui->currentFileEdit->blockSignals(true);
+    auto mappedPos = diffs_.getMappedPos(value);
     auto scrollBar = ui->originalFileEdit->verticalScrollBar();
-    scrollBar->setValue(value);
+    scrollBar->setValue(mappedPos);
     ui->currentFileEdit->blockSignals(false);
 }
 
 void MainWindow::onOriginalFileVScrollBarChanged(int value)
 {
-    qDebug() << "Scroll B" << value;
+    qDebug() << "Scroll A" << value;
     ui->originalFileEdit->blockSignals(true);
     auto scrollBar = ui->currentFileEdit->verticalScrollBar();
     scrollBar->setValue(value);
