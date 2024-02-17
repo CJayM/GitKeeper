@@ -160,15 +160,45 @@
                  <property name="enabled">
                   <bool>true</bool>
                  </property>
+                 <property name="documentTitle">
+                  <string notr="true"/>
+                 </property>
+                 <property name="undoRedoEnabled">
+                  <bool>false</bool>
+                 </property>
+                 <property name="lineWrapMode">
+                  <enum>QPlainTextEdit::NoWrap</enum>
+                 </property>
                  <property name="readOnly">
                   <bool>true</bool>
+                 </property>
+                 <property name="plainText">
+                  <string notr="true"/>
+                 </property>
+                 <property name="backgroundVisible">
+                  <bool>false</bool>
                  </property>
                 </widget>
                </item>
                <item>
                 <widget class="CodeEditor" name="currentFileEdit">
+                 <property name="documentTitle">
+                  <string notr="true"/>
+                 </property>
+                 <property name="undoRedoEnabled">
+                  <bool>false</bool>
+                 </property>
+                 <property name="lineWrapMode">
+                  <enum>QPlainTextEdit::NoWrap</enum>
+                 </property>
                  <property name="readOnly">
                   <bool>true</bool>
+                 </property>
+                 <property name="plainText">
+                  <string notr="true"/>
+                 </property>
+                 <property name="backgroundVisible">
+                  <bool>false</bool>
                  </property>
                 </widget>
                </item>

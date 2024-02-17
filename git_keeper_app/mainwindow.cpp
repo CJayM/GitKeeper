@@ -260,6 +260,8 @@ void MainWindow::onDiffReaded(QString filepath, QString data)
 void MainWindow::colorize()
 {
     QList<QTextEdit::ExtraSelection> selsRight;
+    ui->originalFileEdit->clearDiffBlocks();
+    ui->currentFileEdit->clearDiffBlocks();
 
     for (const auto &oper : qAsConst(diffs_.operations)) {
         ui->originalFileEdit->addDiffBlock(oper.left);

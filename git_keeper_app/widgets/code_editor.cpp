@@ -12,8 +12,6 @@ CodeEditor::CodeEditor(QWidget *parent) : QPlainTextEdit(parent)
     QFont font("Arial", 13);
     setFont(font);
 
-    QFontMetrics metrics(font);
-
     lineNumberArea_ = new LineNumberArea(this);
 
     connect(this, &CodeEditor::blockCountChanged, this, &CodeEditor::updateLineNumberAreaWidth);
@@ -101,40 +99,48 @@ void CodeEditor::paintEvent(QPaintEvent *e)
 {
     QPainter painter(viewport());
     QRect rect = e->rect();
+    painter.fillRect(rect, Qt::white);
     auto doc = document();
 
     auto offset = contentOffset().toPoint();
+
     for (const auto &diff : qAsConst(diffBlocks_)) {
         auto block = doc->findBlockByLineNumber(diff.line - 1);
+        block = doc->findBlockByNumber(block.firstLineNumber());
         auto geo = blockBoundingGeometry(block).toRect();
+        geo.adjust(0, offset.y(), 0, offset.y());
+
         if (diff.count > 1) {
             for (int i = 0; i < diff.count; ++i) {
                 auto blockEnd = doc->findBlockByLineNumber(diff.line - 1 + i);
+                blockEnd = doc->findBlockByNumber(blockEnd.firstLineNumber());
                 auto geoEnd = blockBoundingGeometry(blockEnd).toRect();
+                //                geoEnd.adjust(0, 2, 0, 2);
                 if (rect.intersects(geoEnd))
                     geo.setBottom(geoEnd.bottom());
             }
         }
         if (diff.count == 0) {
-            if (diff.type == DiffOperationType::NOTHINK) {
-                auto newRect = geo;
-                newRect.setHeight(4);
+            auto newRect = geo;
+            QPoint topLeft{0, newRect.bottom() - 2};
+            newRect = QRect(topLeft, newRect.bottomRight());
+            newRect.adjust(0, 2, 0, 2);
+
+            if (diff.type == DiffOperationType::ADD)
+                painter.fillRect(newRect, QColor(Qt::green).lighter(160));
+
+            if (diff.type == DiffOperationType::NOTHINK)
+                painter.fillRect(newRect, QColor(Qt::darkGray));
+
+            if (diff.type == DiffOperationType::REMOVE)
                 painter.fillRect(newRect, QColor(Qt::red).lighter(160));
-            }
-            if (diff.type == DiffOperationType::REMOVE) {
-                auto newRect = geo;
-                newRect.setHeight(4);
-                painter.fillRect(newRect, QColor(Qt::cyan).lighter(160));
-            }
-            if (diff.type == DiffOperationType::REPLACE) {
-                auto newRect = geo;
-                newRect.setHeight(4);
-                painter.fillRect(newRect, QColor(Qt::darkBlue).lighter(160));
-            }
+
+            if (diff.type == DiffOperationType::REPLACE)
+                painter.fillRect(newRect, QColor(Qt::blue).lighter(160));
+
             continue;
         }
 
-        geo.translate(offset);
         if (rect.intersects(geo) == false)
             continue;
 

@@ -4,12 +4,12 @@ void recognizeOperationType(DiffOperation &oper)
 {
     if (oper.left.count > 0 && oper.right.count == 0) {
         oper.left.type = DiffOperationType::REMOVE;
-        oper.right.type = DiffOperationType::NOTHINK;
+        oper.right.type = DiffOperationType::REMOVE;
         return;
     }
 
     if (oper.left.count == 0 && oper.right.count > 0) {
-        oper.left.type = DiffOperationType::NOTHINK;
+        oper.left.type = DiffOperationType::ADD;
         oper.right.type = DiffOperationType::ADD;
         return;
     }
