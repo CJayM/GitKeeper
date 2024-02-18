@@ -22,6 +22,7 @@ void recognizeOperationType(DiffOperation &oper)
 void Diffs::clear()
 {
     operations.clear();
+    currentOperationIndex = -1;
 }
 
 void Diffs::append(DiffOperation oper)
@@ -81,4 +82,26 @@ int Diffs::getMappedRightPos(int pos) const
     float result = minOper->right.line + int((delta2 * percent));
 
     return result;
+}
+
+DiffOperation Diffs::getPrevChange()
+{
+    currentOperationIndex -= 1;
+    if (currentOperationIndex < 0) {
+        currentOperationIndex = 0;
+        return {};
+    }
+
+    return operations[currentOperationIndex];
+}
+
+DiffOperation Diffs::getNextChange()
+{
+    currentOperationIndex += 1;
+    if (currentOperationIndex >= operations.size()) {
+        currentOperationIndex = operations.size() - 1;
+        return {};
+    }
+
+    return operations[currentOperationIndex];
 }

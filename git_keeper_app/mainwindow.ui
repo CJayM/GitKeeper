@@ -37,13 +37,13 @@
         <number>0</number>
        </property>
        <property name="leftMargin">
-        <number>4</number>
+        <number>0</number>
        </property>
        <property name="topMargin">
-        <number>4</number>
+        <number>0</number>
        </property>
        <property name="rightMargin">
-        <number>4</number>
+        <number>0</number>
        </property>
        <property name="bottomMargin">
         <number>0</number>
@@ -133,73 +133,186 @@
          </widget>
          <widget class="QWidget" name="widget_4" native="true">
           <layout class="QVBoxLayout" name="verticalLayout">
+           <property name="spacing">
+            <number>0</number>
+           </property>
+           <property name="leftMargin">
+            <number>0</number>
+           </property>
+           <property name="topMargin">
+            <number>0</number>
+           </property>
+           <property name="rightMargin">
+            <number>0</number>
+           </property>
+           <property name="bottomMargin">
+            <number>0</number>
+           </property>
            <item>
             <widget class="QSplitter" name="splitter">
              <property name="orientation">
               <enum>Qt::Vertical</enum>
              </property>
              <widget class="QWidget" name="splitter_3" native="true">
-              <layout class="QHBoxLayout" name="horizontalLayout_3">
+              <layout class="QVBoxLayout" name="verticalLayout_6">
                <property name="spacing">
-                <number>2</number>
+                <number>0</number>
                </property>
                <property name="leftMargin">
-                <number>2</number>
+                <number>0</number>
                </property>
                <property name="topMargin">
-                <number>2</number>
+                <number>0</number>
                </property>
                <property name="rightMargin">
-                <number>2</number>
+                <number>0</number>
                </property>
                <property name="bottomMargin">
-                <number>2</number>
+                <number>0</number>
                </property>
                <item>
-                <widget class="CodeEditor" name="originalFileEdit">
-                 <property name="enabled">
-                  <bool>true</bool>
-                 </property>
-                 <property name="documentTitle">
-                  <string notr="true"/>
-                 </property>
-                 <property name="undoRedoEnabled">
-                  <bool>false</bool>
-                 </property>
-                 <property name="lineWrapMode">
-                  <enum>QPlainTextEdit::NoWrap</enum>
-                 </property>
-                 <property name="readOnly">
-                  <bool>true</bool>
-                 </property>
-                 <property name="plainText">
-                  <string notr="true"/>
-                 </property>
-                 <property name="backgroundVisible">
-                  <bool>false</bool>
-                 </property>
+                <widget class="QWidget" name="diffToolbar" native="true">
+                 <layout class="QHBoxLayout" name="horizontalLayout_4" stretch="0,0,0,0">
+                  <property name="spacing">
+                   <number>0</number>
+                  </property>
+                  <property name="leftMargin">
+                   <number>0</number>
+                  </property>
+                  <property name="topMargin">
+                   <number>0</number>
+                  </property>
+                  <property name="rightMargin">
+                   <number>0</number>
+                  </property>
+                  <property name="bottomMargin">
+                   <number>0</number>
+                  </property>
+                  <item>
+                   <widget class="QToolButton" name="toolButton_3">
+                    <property name="text">
+                     <string>Refresh</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QToolButton" name="prevFileChangeBtn">
+                    <property name="text">
+                     <string>Prev</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QToolButton" name="nextFileChangeBtn">
+                    <property name="text">
+                     <string>Next</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <spacer name="horizontalSpacer_2">
+                    <property name="orientation">
+                     <enum>Qt::Horizontal</enum>
+                    </property>
+                    <property name="sizeHint" stdset="0">
+                     <size>
+                      <width>40</width>
+                      <height>20</height>
+                     </size>
+                    </property>
+                   </spacer>
+                  </item>
+                 </layout>
                 </widget>
                </item>
                <item>
-                <widget class="CodeEditor" name="currentFileEdit">
-                 <property name="documentTitle">
-                  <string notr="true"/>
-                 </property>
-                 <property name="undoRedoEnabled">
-                  <bool>false</bool>
-                 </property>
-                 <property name="lineWrapMode">
-                  <enum>QPlainTextEdit::NoWrap</enum>
-                 </property>
-                 <property name="readOnly">
-                  <bool>true</bool>
-                 </property>
-                 <property name="plainText">
-                  <string notr="true"/>
-                 </property>
-                 <property name="backgroundVisible">
-                  <bool>false</bool>
-                 </property>
+                <widget class="QWidget" name="diffViewerPanel" native="true">
+                 <layout class="QHBoxLayout" name="horizontalLayout_3">
+                  <property name="spacing">
+                   <number>0</number>
+                  </property>
+                  <property name="leftMargin">
+                   <number>0</number>
+                  </property>
+                  <property name="topMargin">
+                   <number>0</number>
+                  </property>
+                  <property name="rightMargin">
+                   <number>0</number>
+                  </property>
+                  <property name="bottomMargin">
+                   <number>0</number>
+                  </property>
+                  <item>
+                   <widget class="CodeEditor" name="originalFileEdit">
+                    <property name="enabled">
+                     <bool>true</bool>
+                    </property>
+                    <property name="documentTitle">
+                     <string notr="true"/>
+                    </property>
+                    <property name="undoRedoEnabled">
+                     <bool>false</bool>
+                    </property>
+                    <property name="lineWrapMode">
+                     <enum>QPlainTextEdit::NoWrap</enum>
+                    </property>
+                    <property name="readOnly">
+                     <bool>true</bool>
+                    </property>
+                    <property name="plainText">
+                     <string notr="true"/>
+                    </property>
+                    <property name="backgroundVisible">
+                     <bool>false</bool>
+                    </property>
+                    <property name="centerOnScroll">
+                     <bool>true</bool>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QWidget" name="diffActionsWidget" native="true">
+                    <property name="minimumSize">
+                     <size>
+                      <width>40</width>
+                      <height>40</height>
+                     </size>
+                    </property>
+                    <property name="autoFillBackground">
+                     <bool>false</bool>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="CodeEditor" name="currentFileEdit">
+                    <property name="documentTitle">
+                     <string notr="true"/>
+                    </property>
+                    <property name="undoRedoEnabled">
+                     <bool>false</bool>
+                    </property>
+                    <property name="lineWrapMode">
+                     <enum>QPlainTextEdit::NoWrap</enum>
+                    </property>
+                    <property name="readOnly">
+                     <bool>true</bool>
+                    </property>
+                    <property name="plainText">
+                     <string notr="true"/>
+                    </property>
+                    <property name="backgroundVisible">
+                     <bool>false</bool>
+                    </property>
+                    <property name="centerOnScroll">
+                     <bool>true</bool>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                 <zorder>currentFileEdit</zorder>
+                 <zorder>originalFileEdit</zorder>
+                 <zorder>diffActionsWidget</zorder>
                 </widget>
                </item>
               </layout>
@@ -358,7 +471,15 @@
     </property>
     <addaction name="aboutAction"/>
    </widget>
+   <widget class="QMenu" name="menu_3">
+    <property name="title">
+     <string>Изменения</string>
+    </property>
+    <addaction name="nextFileChangeAction"/>
+    <addaction name="prevFileChangeAction"/>
+   </widget>
    <addaction name="menu"/>
+   <addaction name="menu_3"/>
    <addaction name="menu_2"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
@@ -455,6 +576,28 @@
   <action name="aboutAction">
    <property name="text">
     <string>О программе</string>
+   </property>
+  </action>
+  <action name="nextFileChangeAction">
+   <property name="text">
+    <string>Next</string>
+   </property>
+   <property name="toolTip">
+    <string>Next change</string>
+   </property>
+   <property name="shortcut">
+    <string>F6</string>
+   </property>
+  </action>
+  <action name="prevFileChangeAction">
+   <property name="text">
+    <string>Prev</string>
+   </property>
+   <property name="toolTip">
+    <string>Previous changes</string>
+   </property>
+   <property name="shortcut">
+    <string>Shift+F6</string>
    </property>
   </action>
  </widget>

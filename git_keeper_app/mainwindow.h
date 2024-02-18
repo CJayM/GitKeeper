@@ -44,6 +44,8 @@ private slots:
   void onGitStatusFinished(QVector<GitFile> files);
   void onOpenSettingsDialog();
   void onShowAbout();
+  void onPrevChange();
+  void onNextChange();
   void onSaveSettings();
   void onCommitTextChanged();
   void onAmnedChecked(bool checked);
@@ -72,6 +74,7 @@ private slots:
   void colorize();
 
   Diffs diffs_;
+  QVector<GitFile> changedFiles_;
 
   // QWidget interface
 protected:

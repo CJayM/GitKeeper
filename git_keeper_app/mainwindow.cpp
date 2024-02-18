@@ -52,8 +52,12 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     connect(ui->actionCommit, &QAction::triggered, this, &MainWindow::onCommitAction);
     connect(ui->actionOpenSettings, &QAction::triggered, this, &MainWindow::onOpenSettingsDialog);
     connect(ui->aboutAction, &QAction::triggered, this, &MainWindow::onShowAbout);
+    connect(ui->prevFileChangeAction, &QAction::triggered, this, &MainWindow::onPrevChange);
+    connect(ui->nextFileChangeAction, &QAction::triggered, this, &MainWindow::onNextChange);
 
     ui->btnCommit->setDefaultAction(ui->actionCommit);
+    ui->prevFileChangeBtn->setDefaultAction(ui->prevFileChangeAction);
+    ui->nextFileChangeBtn->setDefaultAction(ui->nextFileChangeAction);
 
     connect(ui->btnClearLog, &QAbstractButton::clicked, this, [&]() { ui->logMessage->clear(); });
     connect(ui->commitMessageEdit, &QTextEdit::textChanged, this, &MainWindow::onCommitTextChanged);
@@ -151,6 +155,7 @@ void MainWindow::onReceivedLastMessage(QString data)
 
 void MainWindow::onGitStatusFinished(QVector<GitFile> files)
 {
+    changedFiles_ = files;
     filesModel_->setFiles(files);
     stagedModel_->setFiles(files);
 }
@@ -165,6 +170,38 @@ void MainWindow::onShowAbout()
 {
     splash_->show();
     splash_->showMessage(QString("Version %1").arg(APP_VERSION), Qt::AlignLeft, Qt::white);
+}
+
+void MainWindow::onPrevChange()
+{
+    ui->nextFileChangeAction->setEnabled(true);
+    auto oper = diffs_.getPrevChange();
+    if (oper.right.type == DiffOperationType::UNINITIALIZED) {
+        ui->prevFileChangeAction->setEnabled(false);
+        qDebug() << "End changes";
+        return;
+    }
+    ui->prevFileChangeAction->setEnabled(true);
+
+    qDebug() << "Scroll to " << oper.right.line;
+    auto block = ui->currentFileEdit->document()->findBlockByLineNumber(oper.right.line - 1);
+    ui->currentFileEdit->setTextCursor(QTextCursor(block));
+}
+
+void MainWindow::onNextChange()
+{
+    ui->prevFileChangeAction->setEnabled(true);
+    auto oper = diffs_.getNextChange();
+    if (oper.right.type == DiffOperationType::UNINITIALIZED) {
+        qDebug() << "End changes";
+        ui->nextFileChangeAction->setEnabled(false);
+        return;
+    }
+    ui->nextFileChangeAction->setEnabled(true);
+
+    qDebug() << "Scroll to " << oper.right.line;
+    auto block = ui->currentFileEdit->document()->findBlockByLineNumber(oper.right.line - 1);
+    ui->currentFileEdit->setTextCursor(QTextCursor(block));
 }
 
 void MainWindow::onSaveSettings()
@@ -259,7 +296,6 @@ void MainWindow::onDiffReaded(QString filepath, QString data)
 
 void MainWindow::colorize()
 {
-    QList<QTextEdit::ExtraSelection> selsRight;
     ui->originalFileEdit->clearDiffBlocks();
     ui->currentFileEdit->clearDiffBlocks();
 
