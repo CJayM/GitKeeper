@@ -7,8 +7,8 @@
 #include <QProcess>
 #include <QtConcurrent/QtConcurrent>
 
-GitRepository::GitRepository(AppSettings &settings, QObject *parent)
-    : QObject(parent), settings_(settings)
+GitRepository::GitRepository(const QString &gitPath, QObject *parent)
+    : QObject(parent), gitPath_(gitPath)
 {
     git_ = new Git(this);
 
@@ -51,14 +51,10 @@ void GitRepository::status() {
   currentCommand_ = GIT_COMMAND::STATUS;
   auto params = git_->makeStatusCommand();
 
-  future_ = QtConcurrent::run(git_,
-                              &Git::execute,
-                              getWorkingDir().absolutePath(),
-                              settings_.gitPath,
-                              params);
+  future_ = QtConcurrent::run(git_, &Git::execute, getWorkingDir().absolutePath(), gitPath_, params);
   watcher_->setFuture(future_);
 
-  emit sgnSended(QString("%1 %2").arg(settings_.gitPath).arg(params.join(" ")));
+  emit sgnSended(QString("%1 %2").arg(gitPath_).arg(params.join(" ")));
 }
 
 void GitRepository::commit(QString message, bool isAmend)
@@ -75,11 +71,11 @@ void GitRepository::commit(QString message, bool isAmend)
     future_ = QtConcurrent::run(git_,
                                 &Git::execute,
                                 getWorkingDir().absolutePath(),
-                                settings_.gitPath,
+                                gitPath_,
                                 params);
     watcher_->setFuture(future_);
 
-    emit sgnSended(QString("%1 %2").arg(settings_.gitPath).arg(params.join(" ")));
+    emit sgnSended(QString("%1 %2").arg(gitPath_).arg(params.join(" ")));
 }
 
 void GitRepository::requestLastCommitMessage()
@@ -95,10 +91,10 @@ void GitRepository::requestLastCommitMessage()
     future_ = QtConcurrent::run(git_,
                                 &Git::execute,
                                 getWorkingDir().absolutePath(),
-                                settings_.gitPath,
+                                gitPath_,
                                 params);
     watcher_->setFuture(future_);
-    emit sgnSended(QString("%1 %2").arg(settings_.gitPath).arg(params.join(" ")));
+    emit sgnSended(QString("%1 %2").arg(gitPath_).arg(params.join(" ")));
 }
 
 QFuture<std::pair<QString, QString>> GitRepository::readCurrentFile(QString filepath)
@@ -123,7 +119,7 @@ QFuture<std::pair<QString, QString>> GitRepository::readStagedOrCommitedFile(QSt
         auto localFuture = QtConcurrent::run(git_,
                                              &Git::execute,
                                              getWorkingDir().absolutePath(),
-                                             settings_.gitPath,
+                                             gitPath_,
                                              params);
         localFuture.waitForFinished();
         return std::make_pair(filepath, localFuture.result().result.join("\n"));
@@ -137,14 +133,14 @@ QFuture<std::pair<QString, QString>> GitRepository::readDiffFile(QString filepat
         auto localFuture = QtConcurrent::run(git_,
                                              &Git::execute,
                                              getWorkingDir().absolutePath(),
-                                             settings_.gitPath,
+                                             gitPath_,
                                              params);
         localFuture.waitForFinished();
         return std::make_pair(filepath, localFuture.result().result.join("\n"));
     });
 }
 
-void GitRepository::onSelectFile(QString filepath)
+void GitRepository::queryFile(QString filepath)
 {
     QtConcurrent::run(
         [&](QString filepath) {
@@ -161,6 +157,11 @@ void GitRepository::onSelectFile(QString filepath)
             emit sgnDiffReaded(filepath, future3.result().second);
         },
         filepath);
+}
+
+void GitRepository::setGitPath(const QString &path)
+{
+    gitPath_ = path;
 }
 
 void GitRepository::onStarted()

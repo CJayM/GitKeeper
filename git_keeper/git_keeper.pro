@@ -17,7 +17,13 @@ unix {
 !isEmpty(target.path): INSTALLS += target
 
 HEADERS += \
+    domain/git.h \
+    domain/git_file.h \
+    domain/git_repository.h \
     diff.h
 
 SOURCES += \
+    domain/git.cpp \
+    domain/git_file.cpp \
+    domain/git_repository.cpp \
     diff.cpp

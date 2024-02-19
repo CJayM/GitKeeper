@@ -19,7 +19,6 @@ QT_END_NAMESPACE
 class QTableWidgetItem;
 class QAction;
 class GitFilesModel;
-class GitRepository;
 
 class SettingsDialog;
 class Highlighter;
@@ -53,14 +52,13 @@ private slots:
   void onOriginalFileVScrollBarChanged(int value);
   void onCurrentFileReaded(QString filepath, QString data);
   void onOriginalFileReaded(QString filepath, QString data);
-  void onDiffReaded(QString filepath, QString data);
+  void onDiffReaded();
 
   private:
   Ui::MainWindow *ui;
 
   GitFilesModel *filesModel_ = nullptr;
-  GitFilesModel *stagedModel_ = nullptr;
-  GitRepository *gitRepository_ = nullptr;
+  GitFilesModel *stagedModel_ = nullptr;  
   QString lastCommitMessage_ = "Amned text placed";
 
   Git *git_ = nullptr;
@@ -71,12 +69,9 @@ private slots:
   Highlighter *highlighter_ = nullptr;
   Highlighter *highlighterLeft_ = nullptr;
 
-  void colorize();
-
-  Diffs diffs_;
-  QVector<GitFile> changedFiles_;
+  Diffs *diffs_ = nullptr;
 
   // QWidget interface
-protected:
+  protected:
   void closeEvent(QCloseEvent *);
 };

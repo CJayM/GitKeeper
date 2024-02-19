@@ -74,29 +74,17 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
             this,
             &MainWindow::onOriginalFileVScrollBarChanged);
 
-    gitRepository_ = new GitRepository(settings_, this);
-    gitRepository_->setWorkingDir(QDir("D:\\develop\\git_keeper\\GitKeeper"));
-    connect(gitRepository_,
-            &GitRepository::sgnResultReceived,
-            this,
-            &MainWindow::onGitStatusFinished);
-    connect(gitRepository_, &GitRepository::sgnSended, this, &MainWindow::onSendedToGit);
-    connect(gitRepository_, &GitRepository::sgnReceived, this, &MainWindow::onReceivedFromGit);
-    connect(gitRepository_,
-            &GitRepository::sgnLastMessageReady,
-            this,
-            &MainWindow::onReceivedLastMessage);
-    connect(gitRepository_,
-            &GitRepository::sgnCurrentFileReaded,
-            this,
-            &MainWindow::onCurrentFileReaded);
-    connect(gitRepository_,
-            &GitRepository::sgnOriginalFileReaded,
-            this,
-            &MainWindow::onOriginalFileReaded);
-    connect(gitRepository_, &GitRepository::sgnDiffReaded, this, &MainWindow::onDiffReaded);
+    diffs_ = new Diffs(settings_.gitPath, this);
+    diffs_->setPath(QDir("D:\\develop\\git_keeper\\GitKeeper"));
 
-    gitRepository_->status();
+    connect(diffs_, &Diffs::sgnFilesChanged, this, &MainWindow::onGitStatusFinished);
+    connect(diffs_, &Diffs::sgnSendedToGit, this, &MainWindow::onSendedToGit);
+    connect(diffs_, &Diffs::sgnReceivedFromGit, this, &MainWindow::onReceivedFromGit);
+    connect(diffs_, &Diffs::sgnLastMessageProcessed, this, &MainWindow::onReceivedLastMessage);
+    connect(diffs_, &Diffs::sgnAfterChanged, this, &MainWindow::onCurrentFileReaded);
+    connect(diffs_, &Diffs::sgnBeforeChanged, this, &MainWindow::onOriginalFileReaded);
+    connect(diffs_, &Diffs::sgnDiffChanged, this, &MainWindow::onDiffReaded);
+    diffs_->status();
 }
 
 MainWindow::~MainWindow()
@@ -122,17 +110,17 @@ void MainWindow::onCurrentFileChanged(const QModelIndex &current,
 
   QDir dir(path);
   auto filepath = dir.filePath(file);
-  gitRepository_->onSelectFile(filepath);
+  diffs_->selectCurrentFile(filepath);
 }
 
-void MainWindow::onStatusAction() {  
-  gitRepository_->status();
+void MainWindow::onStatusAction()
+{
+    diffs_->status();
 }
 
 void MainWindow::onCommitAction() {
   auto message = ui->commitMessageEdit->toPlainText();
-  gitRepository_->commit(message, ui->amendCheckBox->isChecked());
-
+  diffs_->commit(message, ui->amendCheckBox->isChecked());
   ui->commitMessageEdit->clear();
 }
 
@@ -154,8 +142,7 @@ void MainWindow::onReceivedLastMessage(QString data)
 }
 
 void MainWindow::onGitStatusFinished(QVector<GitFile> files)
-{
-    changedFiles_ = files;
+{    
     filesModel_->setFiles(files);
     stagedModel_->setFiles(files);
 }
@@ -175,7 +162,7 @@ void MainWindow::onShowAbout()
 void MainWindow::onPrevChange()
 {
     ui->nextFileChangeAction->setEnabled(true);
-    auto oper = diffs_.getPrevChange();
+    auto oper = diffs_->getPrevChange();
     if (oper.right.type == DiffOperationType::UNINITIALIZED) {
         ui->prevFileChangeAction->setEnabled(false);
         qDebug() << "End changes";
@@ -191,7 +178,7 @@ void MainWindow::onPrevChange()
 void MainWindow::onNextChange()
 {
     ui->prevFileChangeAction->setEnabled(true);
-    auto oper = diffs_.getNextChange();
+    auto oper = diffs_->getNextChange();
     if (oper.right.type == DiffOperationType::UNINITIALIZED) {
         qDebug() << "End changes";
         ui->nextFileChangeAction->setEnabled(false);
@@ -227,7 +214,7 @@ void MainWindow::onAmnedChecked(bool checked)
         return;
     }
 
-    gitRepository_->requestLastCommitMessage();
+    diffs_->queryLastCommitMessage();
     //    ui->commitMessageEdit->setPlainText(lastCommitMessage_);
 }
 
@@ -235,7 +222,7 @@ void MainWindow::onCurrentFileVScrollBarChanged(int value)
 {
     qDebug() << "Scroll B" << value;
     ui->currentFileEdit->blockSignals(true);
-    auto mappedPos = diffs_.getMappedLeftPos(value);
+    auto mappedPos = diffs_->getMappedLeftPos(value);
     auto scrollBar = ui->originalFileEdit->verticalScrollBar();
     scrollBar->setValue(mappedPos);
     ui->currentFileEdit->blockSignals(false);
@@ -245,7 +232,7 @@ void MainWindow::onOriginalFileVScrollBarChanged(int value)
 {
     qDebug() << "Scroll A" << value;
     ui->originalFileEdit->blockSignals(true);
-    auto mappedPos = diffs_.getMappedRightPos(value);
+    auto mappedPos = diffs_->getMappedRightPos(value);
     auto scrollBar = ui->currentFileEdit->verticalScrollBar();
     scrollBar->setValue(mappedPos);
     ui->originalFileEdit->blockSignals(false);
@@ -261,45 +248,12 @@ void MainWindow::onOriginalFileReaded(QString filepath, QString data)
     ui->originalFileEdit->setPlainText(data);
 }
 
-void MainWindow::onDiffReaded(QString filepath, QString data)
-{
-    diffs_.clear();
-
-    for (const auto &line : data.split("\n"))
-        qDebug() << line;
-    for (const auto &line : data.split("\n")) {
-        if (line.startsWith("@@") == false)
-            continue;
-        auto newLine = line.mid(4);
-        auto parts = newLine.split("@@");
-        auto digits = parts.first().split("+");
-        auto leftParts = digits[0].trimmed().split(",");
-        auto rightParts = digits[1].trimmed().split(",");
-
-        if (leftParts.size() == 1)
-            leftParts << "1";
-        if (rightParts.size() == 1)
-            rightParts << "1";
-
-        DiffOperation oper;
-        oper.left.line = leftParts[0].toInt();
-        oper.left.count = leftParts[1].toInt();
-        oper.right.line = rightParts[0].toInt();
-        oper.right.count = rightParts[1].toInt();
-        recognizeOperationType(oper);
-
-        diffs_.append(oper);
-    }
-
-    colorize();
-}
-
-void MainWindow::colorize()
+void MainWindow::onDiffReaded()
 {
     ui->originalFileEdit->clearDiffBlocks();
     ui->currentFileEdit->clearDiffBlocks();
 
-    for (const auto &oper : qAsConst(diffs_.operations)) {
+    for (const auto &oper : qAsConst(diffs_->operations)) {
         ui->originalFileEdit->addDiffBlock(oper.left);
         ui->currentFileEdit->addDiffBlock(oper.right);
     }

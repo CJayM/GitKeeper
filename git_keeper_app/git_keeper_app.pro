@@ -16,10 +16,7 @@ RC_ICONS = resources/app_icon_64.ico
 
 SOURCES += \
     app_settings.cpp \
-    widgets/code_editor.cpp \
-    domain/git.cpp \
-    domain/git_file.cpp \
-    domain/git_repository.cpp \
+    widgets/code_editor.cpp \    
     highlighter.cpp \
     main.cpp \
     mainwindow.cpp \
@@ -29,10 +26,7 @@ SOURCES += \
 
 HEADERS += \
     app_settings.h \
-    widgets/code_editor.h \
-    domain/git.h \
-    domain/git_file.h \
-    domain/git_repository.h \
+    widgets/code_editor.h \    
     highlighter.h \
     mainwindow.h \
     models/git_files_model.h \

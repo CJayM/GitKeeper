@@ -8,7 +8,7 @@ void DiffScrollMapper_Test::test_mapped_pos()
 {
     const auto REPLACE = DiffOperationType::REPLACE;
 
-    Diffs diffs;
+    Diffs diffs("");
     diffs.append(DiffOperation{{10, 1, REPLACE}, {10, 1, REPLACE}});
     diffs.append(DiffOperation{{20, 1, REPLACE}, {30, 1, REPLACE}});
     diffs.append(DiffOperation{{32, 1, REPLACE}, {48, 1, REPLACE}});

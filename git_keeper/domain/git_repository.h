@@ -2,7 +2,6 @@
 
 #include "git_file.h"
 
-#include "app_settings.h"
 #include <QDir>
 #include <QFuture>
 #include <QFutureWatcher>
@@ -17,14 +16,16 @@ class GitRepository : public QObject
 {
     Q_OBJECT
 public:
-    GitRepository(AppSettings &settings, QObject *parent);
+    GitRepository(const QString &gitPath, QObject *parent);
     const QDir &getWorkingDir() const;
     void setWorkingDir(const QDir &dir);
 
     void status();
     void commit(QString message, bool isAmend);
     void requestLastCommitMessage();
-    void onSelectFile(QString filepath);
+    void queryFile(QString filepath);
+
+    void setGitPath(const QString &path);
 
 signals:
     void sgnSended(QString data);
@@ -45,7 +46,7 @@ private slots:
 
   private:
   QDir workingDir_;
-  AppSettings &settings_;
+  QString gitPath_;
   Git *git_ = nullptr;
   QFuture<CommandResult> future_;
   QFutureWatcher<CommandResult> *watcher_;
