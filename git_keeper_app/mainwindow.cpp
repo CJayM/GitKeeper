@@ -95,22 +95,18 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::onCurrentFileChanged(const QModelIndex &current,
-                                      const QModelIndex &previous) {  
-  if (current.isValid() == false) {
-    ui->originalFileEdit->clear();
-    ui->currentFileEdit->clear();
-    return;
-  }
+void MainWindow::onCurrentFileChanged(const QModelIndex &current, const QModelIndex &previous)
+{
+    if (current.isValid() == false) {
+        ui->originalFileEdit->clear();
+        ui->currentFileEdit->clear();
+        return;
+    }
 
-  auto file = filesModel_->data(current.sibling(current.row(), 0), GitFilesModel::NAME_ROLE)
-                  .toString();
-  auto path = filesModel_->data(current.sibling(current.row(), 0), GitFilesModel::PATH_ROLE)
-                  .toString();
-
-  QDir dir(path);
-  auto filepath = dir.filePath(file);
-  diffs_->selectCurrentFile(filepath);
+    auto filepath = filesModel_
+                        ->data(current.sibling(current.row(), 0), GitFilesModel::FULL_PATH_ROLE)
+                        .toString();
+    diffs_->selectCurrentFile(filepath);
 }
 
 void MainWindow::onStatusAction()
@@ -142,7 +138,7 @@ void MainWindow::onReceivedLastMessage(QString data)
 }
 
 void MainWindow::onGitStatusFinished(QVector<GitFile> files)
-{    
+{
     filesModel_->setFiles(files);
     stagedModel_->setFiles(files);
 }

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <QDir>
 #include <QString>
 #include <QStringList>
 
@@ -22,7 +23,7 @@ FileState charToState(QChar ch);
 
 struct GitFile {
   QString name;
-  QString path;
+  QDir path;
   FileState indexState;
   FileState workState;
   //  std::array<char, 4> submoduleState;

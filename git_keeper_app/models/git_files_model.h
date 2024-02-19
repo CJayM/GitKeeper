@@ -8,6 +8,7 @@ class GitFilesModel : public QAbstractTableModel
 public:
     const static int NAME_ROLE = Qt::UserRole + 1;
     const static int PATH_ROLE = Qt::UserRole + 2;
+    const static int FULL_PATH_ROLE = Qt::UserRole + 3;
 
     GitFilesModel();
 

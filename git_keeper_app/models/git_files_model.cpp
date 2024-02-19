@@ -43,7 +43,7 @@ QVariant GitFilesModel::data(const QModelIndex &index, int role) const {
             .arg(stateToChar(files_[pos].indexState))
             .arg(stateToChar(files_[pos].workState));
     case 2:
-      return files_[pos].path;
+        return files_[pos].path.path();
     }
 
     return index.column();
@@ -59,7 +59,13 @@ QVariant GitFilesModel::data(const QModelIndex &index, int role) const {
       int pos = index.row();
       if (pos >= files_.size())
           return {};
-      return files_[pos].path;
+      return files_[pos].path.canonicalPath();
+  }
+  if (role == FULL_PATH_ROLE) {
+      int pos = index.row();
+      if (pos >= files_.size())
+          return {};
+      return files_[pos].path.filePath(files_[pos].name);
   }
 
   return {};
