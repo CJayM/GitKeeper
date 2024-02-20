@@ -52,3 +52,8 @@ FileState charToState(QChar ch) {
 
   return FileState::UNRECOGNIZED;
 }
+
+QString GitFile::fullPath() const
+{
+    return path.filePath(name);
+}
