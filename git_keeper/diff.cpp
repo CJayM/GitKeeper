@@ -122,7 +122,11 @@ DiffOperation Diffs::getPrevChange()
 {
     currentOperationIndex -= 1;
     if (currentOperationIndex < 0) {
-        currentOperationIndex = 0;
+        if (hasPrevFile()) {
+            selectPrevFile();
+            currentOperationIndex = -1;
+            return getNextChange();
+        }
         return {};
     }
 
@@ -133,7 +137,12 @@ DiffOperation Diffs::getNextChange()
 {
     currentOperationIndex += 1;
     if (currentOperationIndex >= operations.size()) {
-        currentOperationIndex = operations.size() - 1;
+        if (hasNextFile()) {
+            selectNextFile();
+            currentOperationIndex = -1;
+            return getNextChange();
+        }
+
         return {};
     }
 
@@ -148,9 +157,48 @@ void Diffs::selectCurrentFile(QString filepath)
     emit sgnCurrentFileChanged(filepath);
 }
 
+bool Diffs::hasNextFile() const
+{
+    if (changedFiles_.isEmpty())
+        return false;
+
+    bool finded = false;
+    for (const auto &file : changedFiles_) {
+        auto fullPath = file.fullPath();
+        if (finded) {
+            return true;
+        }
+        if (fullPath == currentFile_) {
+            finded = true;
+            continue;
+        }
+    }
+
+    return false;
+}
+
+bool Diffs::hasPrevFile() const
+{
+    if (changedFiles_.isEmpty())
+        return false;
+
+    QString prevFile;
+    for (const auto &file : changedFiles_) {
+        auto fullPath = file.fullPath();
+        if (fullPath == currentFile_) {
+            if (prevFile.isEmpty() == false) {
+                return true;
+            }
+            break;
+        }
+        prevFile = fullPath;
+    }
+
+    return false;
+}
+
 bool Diffs::selectNextFile()
 {
-    qDebug() << "Next file";
     bool finded = false;
 
     for (const auto &file : changedFiles_) {

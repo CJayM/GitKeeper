@@ -40,6 +40,8 @@ public:
     DiffOperation getPrevChange();
     DiffOperation getNextChange();
     void selectCurrentFile(QString filepath);
+    bool hasNextFile() const;
+    bool hasPrevFile() const;
     bool selectNextFile();
     bool selectPrevFile();
 

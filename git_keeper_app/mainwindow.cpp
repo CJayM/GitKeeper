@@ -177,6 +177,7 @@ void MainWindow::onPrevChange()
 void MainWindow::onNextChange()
 {
     ui->prevFileChangeAction->setEnabled(true);
+
     auto oper = diffs_->getNextChange();
     if (oper.right.type == DiffOperationType::UNINITIALIZED) {
         qDebug() << "End changes";
