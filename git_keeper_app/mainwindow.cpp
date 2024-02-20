@@ -73,16 +73,17 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
             this,
             &MainWindow::onOriginalFileVScrollBarChanged);
 
-    diffs_ = new Diffs(settings_.gitPath, this);
+    diffs_ = new Project(settings_.gitPath, this);
     diffs_->setPath(QDir("D:\\develop\\git_keeper\\GitKeeper"));
 
-    connect(diffs_, &Diffs::sgnFilesChanged, this, &MainWindow::onGitStatusFinished);
-    connect(diffs_, &Diffs::sgnSendedToGit, this, &MainWindow::onSendedToGit);
-    connect(diffs_, &Diffs::sgnReceivedFromGit, this, &MainWindow::onReceivedFromGit);
-    connect(diffs_, &Diffs::sgnLastMessageProcessed, this, &MainWindow::onReceivedLastMessage);
-    connect(diffs_, &Diffs::sgnAfterChanged, this, &MainWindow::onCurrentFileReaded);
-    connect(diffs_, &Diffs::sgnBeforeChanged, this, &MainWindow::onOriginalFileReaded);
-    connect(diffs_, &Diffs::sgnDiffChanged, this, &MainWindow::onDiffReaded);
+    connect(diffs_, &Project::sgnFilesChanged, this, &MainWindow::onGitStatusFinished);
+    connect(diffs_, &Project::sgnSendedToGit, this, &MainWindow::onSendedToGit);
+    connect(diffs_, &Project::sgnReceivedFromGit, this, &MainWindow::onReceivedFromGit);
+    connect(diffs_, &Project::sgnLastMessageProcessed, this, &MainWindow::onReceivedLastMessage);
+    connect(diffs_, &Project::sgnAfterChanged, this, &MainWindow::onCurrentFileReaded);
+    connect(diffs_, &Project::sgnBeforeChanged, this, &MainWindow::onOriginalFileReaded);
+    connect(diffs_, &Project::sgnDiffChanged, this, &MainWindow::onDiffReaded);
+    connect(diffs_, &Project::sgnCurrentFileChanged, this, &MainWindow::onCurrentFileChanged);
     diffs_->status();
 
     connect(ui->prevFileBtn, &QAbstractButton::clicked, this, &MainWindow::onPrevFileClicked);

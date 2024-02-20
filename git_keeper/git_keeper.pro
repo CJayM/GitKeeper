@@ -20,10 +20,12 @@ HEADERS += \
     domain/git.h \
     domain/git_file.h \
     domain/git_repository.h \
-    diff.h
+    diff.h \
+    domain/project.h
 
 SOURCES += \
     domain/git.cpp \
     domain/git_file.cpp \
     domain/git_repository.cpp \
-    diff.cpp
+    diff.cpp \
+    domain/project.cpp
