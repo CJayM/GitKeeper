@@ -23,6 +23,7 @@ class GitFilesModel;
 class SettingsDialog;
 class Highlighter;
 class QSplashScreen;
+class QItemSelectionModel;
 
 class MainWindow : public QMainWindow {
   Q_OBJECT
@@ -32,10 +33,9 @@ public:
   ~MainWindow();
 
 private slots:
-  void onCurrentFileChanged(const QModelIndex &current,
-                            const QModelIndex &previous);
-  void onStatusAction();
-  void onCommitAction();
+    void onCurrentFileIndexChanged(const QModelIndex &current, const QModelIndex &previous);
+    void onStatusAction();
+    void onCommitAction();
 
   void onSendedToGit(QString data);
   void onReceivedFromGit(QString data, bool isError);
@@ -47,12 +47,13 @@ private slots:
   void onNextChange();
   void onSaveSettings();
   void onCommitTextChanged();
-  void onAmnedChecked(bool checked);
-  void onCurrentFileVScrollBarChanged(int value);
-  void onOriginalFileVScrollBarChanged(int value);
-  void onCurrentFileReaded(QString filepath, QString data);
-  void onOriginalFileReaded(QString filepath, QString data);
-  void onDiffReaded();
+    void onAmnedChecked(bool checked);
+    void onCurrentFileVScrollBarChanged(int value);
+    void onOriginalFileVScrollBarChanged(int value);
+    void onCurrentFileChanged(QString path);
+    void onCurrentFileReaded(QString filepath, QString data);
+    void onOriginalFileReaded(QString filepath, QString data);
+    void onDiffReaded();
 
   void onPrevFileClicked();
   void onNextFileClicked();
@@ -60,12 +61,13 @@ private slots:
   private:
   Ui::MainWindow *ui;
 
-  GitFilesModel *filesModel_ = nullptr;
-  GitFilesModel *stagedModel_ = nullptr;  
-  QString lastCommitMessage_ = "Amned text placed";
+    GitFilesModel *filesModel_ = nullptr;
+    GitFilesModel *stagedModel_ = nullptr;
+    QString lastCommitMessage_ = "Amned text placed";
+    QItemSelectionModel *selectionModel_ = nullptr;
 
-  Git *git_ = nullptr;
-  QSplashScreen *splash_ = nullptr;
+    Git *git_ = nullptr;
+    QSplashScreen *splash_ = nullptr;
 
   SettingsDialog *settingsDialog_ = nullptr;
   AppSettings settings_;

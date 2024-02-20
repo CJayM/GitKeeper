@@ -38,12 +38,11 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     stagedModel_->setIsStaged(true);
     ui->stagedTableView->setModel(stagedModel_);
 
-    auto selectionModel = ui->filesTableView->selectionModel();
-
-    connect(selectionModel,
+    selectionModel_ = ui->filesTableView->selectionModel();
+    connect(selectionModel_,
             &QItemSelectionModel::currentChanged,
             this,
-            &MainWindow::onCurrentFileChanged);
+            &MainWindow::onCurrentFileIndexChanged);
 
     QPixmap pixmap(":/resources/splash.png");
     splash_ = new QSplashScreen(this, pixmap);
@@ -98,7 +97,7 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::onCurrentFileChanged(const QModelIndex &current, const QModelIndex &previous)
+void MainWindow::onCurrentFileIndexChanged(const QModelIndex &current, const QModelIndex &previous)
 {
     if (current.isValid() == false) {
         ui->originalFileEdit->clear();
@@ -144,6 +143,7 @@ void MainWindow::onGitStatusFinished(QVector<GitFile> files)
 {
     filesModel_->setFiles(files);
     stagedModel_->setFiles(files);
+    diffs_->selectNextFile();
 }
 
 void MainWindow::onOpenSettingsDialog()
@@ -236,6 +236,23 @@ void MainWindow::onOriginalFileVScrollBarChanged(int value)
     auto scrollBar = ui->currentFileEdit->verticalScrollBar();
     scrollBar->setValue(mappedPos);
     ui->originalFileEdit->blockSignals(false);
+}
+
+void MainWindow::onCurrentFileChanged(QString path)
+{
+    qDebug() << "Current Changed" << path;
+    auto indexes = filesModel_->match(filesModel_->index(0, 0, {}),
+                                      GitFilesModel::FULL_PATH_ROLE,
+                                      path,
+                                      1);
+    if (indexes.isEmpty()) {
+        selectionModel_->setCurrentIndex({}, QItemSelectionModel::SelectionFlag::Clear);
+        return;
+    }
+    selectionModel_->setCurrentIndex(indexes.first(),
+                                     QItemSelectionModel::SelectionFlag::ClearAndSelect
+                                         | QItemSelectionModel::SelectionFlag::Current
+                                         | QItemSelectionModel::SelectionFlag::Rows);
 }
 
 void MainWindow::onCurrentFileReaded(QString filepath, QString data)

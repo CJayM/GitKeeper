@@ -199,6 +199,14 @@ bool Diffs::hasPrevFile() const
 
 bool Diffs::selectNextFile()
 {
+    if (changedFiles_.isEmpty())
+        return false;
+
+    if (currentFile_.isEmpty() == true) {
+        selectCurrentFile(changedFiles_.first().fullPath());
+        return true;
+    }
+
     bool finded = false;
 
     for (const auto &file : changedFiles_) {
