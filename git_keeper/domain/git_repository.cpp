@@ -42,19 +42,40 @@ const QDir &GitRepository::getWorkingDir() const { return workingDir_; }
 
 void GitRepository::setWorkingDir(const QDir &dir) { workingDir_ = dir; }
 
-void GitRepository::status() {
-  if (watcher_)
-    watcher_->cancel();
-  if (future_.isRunning())
-      future_.cancel();
+void GitRepository::status()
+{
+    auto future = QtConcurrent::run([&]() {
+        emit sgnBlockStatusAndDiff(true);
 
-  currentCommand_ = GIT_COMMAND::STATUS;
-  auto params = git_->makeStatusCommand();
+        auto params = git_->makeStatusCommand();
+        auto statusFuture = QtConcurrent::run(git_,
+                                              &Git::execute,
+                                              getWorkingDir().absolutePath(),
+                                              gitPath_,
+                                              params);
+        emit sgnSended(QString("%1 %2").arg(gitPath_).arg(params.join(" ")));
+        statusFuture.waitForFinished();
 
-  future_ = QtConcurrent::run(git_, &Git::execute, getWorkingDir().absolutePath(), gitPath_, params);
-  watcher_->setFuture(future_);
+        auto text = statusFuture.result().result.join("\n");
+        emit sgnReceived(text, false);
 
-  emit sgnSended(QString("%1 %2").arg(gitPath_).arg(params.join(" ")));
+        auto files = proccessGitStatus(text);
+        emit sgnResultReceived(files);
+
+        params = git_->makeShowDiffCommand();
+        auto diffFuture = QtConcurrent::run(git_,
+                                            &Git::execute,
+                                            getWorkingDir().absolutePath(),
+                                            gitPath_,
+                                            params);
+
+        emit sgnSended(QString("%1 %2").arg(gitPath_).arg(params.join(" ")));
+
+        diffFuture.waitForFinished();
+        emit sgnBlockStatusAndDiff(false);
+
+        //        return std::make_pair(filepath, localFuture.result().result.join("\n"));
+    });
 }
 
 void GitRepository::commit(QString message, bool isAmend)
@@ -180,10 +201,6 @@ void GitRepository::onResultReadyAt(int resultIndex)
     auto text = res.result.join("\n");
     emit sgnReceived(text, false);
 
-    if (currentCommand_ == GIT_COMMAND::STATUS) {
-        auto files = proccessGitStatus(text);
-        emit sgnResultReceived(files);
-    }
     if (currentCommand_ == GIT_COMMAND::COMMIT) {
     }
     if (currentCommand_ == GIT_COMMAND::LAST_MESSAGE) {

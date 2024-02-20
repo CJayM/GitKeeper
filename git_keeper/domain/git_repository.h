@@ -10,7 +10,7 @@
 
 class Git;
 
-enum class GIT_COMMAND { NO, COMMIT, STATUS, LAST_MESSAGE };
+enum class GIT_COMMAND { NO, COMMIT, LAST_MESSAGE };
 
 class GitRepository : public QObject
 {
@@ -37,6 +37,9 @@ signals:
     void sgnCurrentFileReaded(QString filepath, QString data);
     void sgnOriginalFileReaded(QString filepath, QString data);
     void sgnDiffReaded(QString filepath, QString data);
+
+    void sgnBlockStatusAndDiff(
+        bool isBlocked); // сигнал блокирования в связи с процессом получения статуса или diff
 
 private slots:
   void onFutureProgress(int progressValue);
