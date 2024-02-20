@@ -172,7 +172,7 @@
                </property>
                <item>
                 <widget class="QWidget" name="diffToolbar" native="true">
-                 <layout class="QHBoxLayout" name="horizontalLayout_4" stretch="0,0,0,0">
+                 <layout class="QHBoxLayout" name="horizontalLayout_4" stretch="0,0,0,0,0">
                   <property name="spacing">
                    <number>0</number>
                   </property>
@@ -189,23 +189,16 @@
                    <number>0</number>
                   </property>
                   <item>
-                   <widget class="QToolButton" name="toolButton_3">
+                   <widget class="QToolButton" name="prevFileBtn">
                     <property name="text">
-                     <string>Refresh</string>
+                     <string>prevFile</string>
                     </property>
                    </widget>
                   </item>
                   <item>
-                   <widget class="QToolButton" name="prevFileChangeBtn">
+                   <widget class="QToolButton" name="nextFileBtn">
                     <property name="text">
-                     <string>Prev</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <widget class="QToolButton" name="nextFileChangeBtn">
-                    <property name="text">
-                     <string>Next</string>
+                     <string>nextFile</string>
                     </property>
                    </widget>
                   </item>
@@ -221,6 +214,20 @@
                      </size>
                     </property>
                    </spacer>
+                  </item>
+                  <item>
+                   <widget class="QToolButton" name="prevFileChangeBtn">
+                    <property name="text">
+                     <string>Prev</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QToolButton" name="nextFileChangeBtn">
+                    <property name="text">
+                     <string>Next</string>
+                    </property>
+                   </widget>
                   </item>
                  </layout>
                 </widget>

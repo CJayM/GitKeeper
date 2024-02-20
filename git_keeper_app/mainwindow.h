@@ -54,6 +54,9 @@ private slots:
   void onOriginalFileReaded(QString filepath, QString data);
   void onDiffReaded();
 
+  void onPrevFileClicked();
+  void onNextFileClicked();
+
   private:
   Ui::MainWindow *ui;
 

@@ -145,11 +145,46 @@ void Diffs::selectCurrentFile(QString filepath)
     currentFile_ = filepath;
     qDebug() << "Current file:" << filepath;
     gitRepository_->queryFile(filepath);
+    emit sgnCurrentFileChanged(filepath);
 }
 
-bool Diffs::selectNextFile() {}
+bool Diffs::selectNextFile()
+{
+    qDebug() << "Next file";
+    bool finded = false;
 
-bool Diffs::selectPrevFile() {}
+    for (const auto &file : changedFiles_) {
+        auto fullPath = file.fullPath();
+        if (finded) {
+            selectCurrentFile(fullPath);
+            return true;
+        }
+        if (fullPath == currentFile_) {
+            finded = true;
+            continue;
+        }
+    }
+
+    return false;
+}
+
+bool Diffs::selectPrevFile()
+{
+    QString prevFile;
+    for (const auto &file : changedFiles_) {
+        auto fullPath = file.fullPath();
+        if (fullPath == currentFile_) {
+            if (prevFile.isEmpty() == false) {
+                selectCurrentFile(prevFile);
+                return true;
+            }
+            break;
+        }
+        prevFile = fullPath;
+    }
+
+    return false;
+}
 
 void Diffs::status()
 {

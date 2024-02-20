@@ -34,6 +34,7 @@ struct GitFile {
   QString fileModeWorkTree;
   QString nameHead;
   QString nameIndex;
+
   QString fullPath() const;
 };
 

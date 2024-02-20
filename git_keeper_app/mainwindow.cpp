@@ -85,6 +85,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     connect(diffs_, &Diffs::sgnBeforeChanged, this, &MainWindow::onOriginalFileReaded);
     connect(diffs_, &Diffs::sgnDiffChanged, this, &MainWindow::onDiffReaded);
     diffs_->status();
+
+    connect(ui->prevFileBtn, &QAbstractButton::clicked, this, &MainWindow::onPrevFileClicked);
+    connect(ui->nextFileBtn, &QAbstractButton::clicked, this, &MainWindow::onNextFileClicked);
 }
 
 MainWindow::~MainWindow()
@@ -253,6 +256,16 @@ void MainWindow::onDiffReaded()
         ui->originalFileEdit->addDiffBlock(oper.left);
         ui->currentFileEdit->addDiffBlock(oper.right);
     }
+}
+
+void MainWindow::onPrevFileClicked()
+{
+    diffs_->selectPrevFile();
+}
+
+void MainWindow::onNextFileClicked()
+{
+    diffs_->selectNextFile();
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)

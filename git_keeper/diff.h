@@ -55,6 +55,7 @@ signals:
     void sgnAfterChanged(QString filepath, QString data);
     void sgnBeforeChanged(QString filepath, QString data);
     void sgnDiffChanged();
+    void sgnCurrentFileChanged(QString filepath);
 
 private slots:
     void onGitStatusFinished(QVector<GitFile> result);
