@@ -76,6 +76,10 @@ QStringList Git::makeShowDiffCommand(QString filepath) const
     QStringList result;
     result << "diff"
            << "--no-color"
-           << "-U0" << filepath;
+           << "-U0";
+
+    if (filepath.isEmpty() == false)
+        result << filepath;
+
     return result;
 }
