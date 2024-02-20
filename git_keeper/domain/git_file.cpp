@@ -57,3 +57,8 @@ QString GitFile::fullPath() const
 {
     return path.filePath(name);
 }
+
+void git_file_register_metatypes()
+{
+    qRegisterMetaType<QVector<GitFile>>("QVector<GitFile>");
+}

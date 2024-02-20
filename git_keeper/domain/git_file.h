@@ -43,3 +43,5 @@ struct CommandResult
     QStringList arguments;
     QStringList result;
 };
+
+void git_file_register_metatypes();
