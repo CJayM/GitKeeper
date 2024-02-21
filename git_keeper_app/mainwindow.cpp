@@ -271,7 +271,9 @@ void MainWindow::onDiffReaded()
     ui->originalFileEdit->clearDiffBlocks();
     ui->currentFileEdit->clearDiffBlocks();
 
-    for (const auto &oper : qAsConst(diffs_->operations)) {
+    const auto diffs = diffs_->getCurrentFileDiffs();
+
+    for (const auto &oper : diffs) {
         ui->originalFileEdit->addDiffBlock(oper.left);
         ui->currentFileEdit->addDiffBlock(oper.right);
     }

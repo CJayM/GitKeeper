@@ -13,11 +13,12 @@ public:
     void setGitPath(QString path);
     void setPath(QDir path);
 
-    QVector<DiffOperation> operations;
-    void clear();
-    void append(DiffOperation oper);
+    void clearDiffs();
+    void append(QString filePath, DiffOperation oper);
     int getMappedLeftPos(int pos) const;
     int getMappedRightPos(int pos) const;
+
+    const QVector<DiffOperation> getCurrentFileDiffs() const;
 
     DiffOperation getPrevChange();
     DiffOperation getNextChange();
@@ -48,7 +49,7 @@ private slots:
     void onReceivedLastMessage(QString data);
     void onCurrentFileReaded(QString filepath, QString data);
     void onOriginalFileReaded(QString filepath, QString data);
-    void onDiffReaded(QString filepath, QString data);
+    void onDiffsReaded(QStringList data);
 
 private:
     int currentOperationIndex = -1;
@@ -57,4 +58,5 @@ private:
     GitRepository *gitRepository_ = nullptr;
 
     QVector<GitFile> changedFiles_;
+    QHash<QString, QVector<DiffOperation>> operations_;
 };

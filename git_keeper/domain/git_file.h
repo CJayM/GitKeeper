@@ -26,12 +26,12 @@ struct GitFile {
     QString name;
     QDir path;
     FileState indexState;
-  FileState workState;
-  //  std::array<char, 4> submoduleState;
-  QString submoduleState;
-  //  std::array<char, 6> fileModeHead;
-  QString fileModeHead;
-  QString fileModeIndex;
+    FileState workState;
+    //  std::array<char, 4> submoduleState;
+    QString submoduleState;
+    //  std::array<char, 6> fileModeHead;
+    QString fileModeHead;
+    QString fileModeIndex;
     QString fileModeWorkTree;
     QString nameHead;
     QString nameIndex;

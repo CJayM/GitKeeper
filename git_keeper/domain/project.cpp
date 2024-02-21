@@ -20,7 +20,7 @@ Project::Project(QString gitPath, QObject *parent) : QObject(parent), gitPath_(g
             &GitRepository::sgnOriginalFileReaded,
             this,
             &Project::onOriginalFileReaded);
-    connect(gitRepository_, &GitRepository::sgnDiffReaded, this, &Project::onDiffReaded);
+    connect(gitRepository_, &GitRepository::sgnDiffsReaded, this, &Project::onDiffsReaded);
 }
 
 void Project::setGitPath(QString path)
@@ -34,69 +34,82 @@ void Project::setPath(QDir path)
     gitRepository_->setWorkingDir(path);
 }
 
-void Project::clear()
+void Project::clearDiffs()
 {
-    operations.clear();
+    for (auto &oper : operations_.values())
+        oper.clear();
+    operations_.clear();
+
     currentOperationIndex = -1;
 }
 
-void Project::append(DiffOperation oper)
+void Project::append(QString filePath, DiffOperation oper)
 {
-    operations.append(oper);
+    if (operations_.contains(filePath) == false)
+        operations_[filePath] = {};
+
+    operations_[filePath].append(oper);
 }
 
 int Project::getMappedLeftPos(int pos) const
 {
-    if (operations.isEmpty())
-        return pos;
+    return pos;
+    //    if (operations.isEmpty())
+    //        return pos;
 
-    const DiffOperation *minOper = &operations.first();
-    const DiffOperation *maxOper = nullptr;
+    //    const DiffOperation *minOper = &operations.first();
+    //    const DiffOperation *maxOper = nullptr;
 
-    for (const auto &oper : operations) {
-        maxOper = &oper;
-        if (maxOper->right.line >= pos)
-            break;
-        minOper = maxOper;
-    }
+    //    for (const auto &oper : operations) {
+    //        maxOper = &oper;
+    //        if (maxOper->right.line >= pos)
+    //            break;
+    //        minOper = maxOper;
+    //    }
 
-    if (minOper == maxOper)
-        return pos;
+    //    if (minOper == maxOper)
+    //        return pos;
 
-    float delta = maxOper->right.line - minOper->right.line;
-    float percent = (pos - minOper->right.line) / delta;
+    //    float delta = maxOper->right.line - minOper->right.line;
+    //    float percent = (pos - minOper->right.line) / delta;
 
-    float delta2 = maxOper->left.line - minOper->left.line;
-    float result = minOper->left.line + int((delta2 * percent));
+    //    float delta2 = maxOper->left.line - minOper->left.line;
+    //    float result = minOper->left.line + int((delta2 * percent));
 
-    return result;
+    //    return result;
 }
 
 int Project::getMappedRightPos(int pos) const
 {
-    if (operations.isEmpty())
-        return pos;
+    return pos;
+    //    if (operations.isEmpty())
+    //        return pos;
 
-    const DiffOperation *minOper = &operations.first();
-    const DiffOperation *maxOper = nullptr;
+    //    const DiffOperation *minOper = &operations.first();
+    //    const DiffOperation *maxOper = nullptr;
 
-    for (const auto &oper : operations) {
-        maxOper = &oper;
-        if (maxOper->left.line >= pos)
-            break;
-        minOper = maxOper;
-    }
+    //    for (const auto &oper : operations) {
+    //        maxOper = &oper;
+    //        if (maxOper->left.line >= pos)
+    //            break;
+    //        minOper = maxOper;
+    //    }
 
-    if (minOper == maxOper)
-        return pos;
+    //    if (minOper == maxOper)
+    //        return pos;
 
-    float delta = maxOper->left.line - minOper->left.line;
-    float percent = (pos - minOper->left.line) / delta;
+    //    float delta = maxOper->left.line - minOper->left.line;
+    //    float percent = (pos - minOper->left.line) / delta;
 
-    float delta2 = maxOper->right.line - minOper->right.line;
-    float result = minOper->right.line + int((delta2 * percent));
+    //    float delta2 = maxOper->right.line - minOper->right.line;
+    //    float result = minOper->right.line + int((delta2 * percent));
 
-    return result;
+    //    return result;
+}
+
+const QVector<DiffOperation> Project::getCurrentFileDiffs() const
+{
+    return operations_[currentFile_];
 }
 
 DiffOperation Project::getPrevChange()
@@ -111,13 +124,13 @@ DiffOperation Project::getPrevChange()
         return {};
     }
 
-    return operations[currentOperationIndex];
+    return operations_[currentFile_][currentOperationIndex];
 }
 
 DiffOperation Project::getNextChange()
 {
     currentOperationIndex += 1;
-    if (currentOperationIndex >= operations.size()) {
+    if (currentOperationIndex >= operations_[currentFile_].size()) {
         if (hasNextFile()) {
             selectNextFile();
             currentOperationIndex = -1;
@@ -127,7 +140,7 @@ DiffOperation Project::getNextChange()
         return {};
     }
 
-    return operations[currentOperationIndex];
+    return operations_[currentFile_][currentOperationIndex];
 }
 
 void Project::selectCurrentFile(QString filepath)
@@ -265,11 +278,17 @@ void Project::onOriginalFileReaded(QString filepath, QString data)
     emit sgnBeforeChanged(filepath, data);
 }
 
-void Project::onDiffReaded(QString filepath, QString data)
+void Project::onDiffsReaded(QStringList data)
 {
-    clear();
+    clearDiffs();
 
-    for (const auto &line : data.split("\n")) {
+    QString filePath;
+    for (const auto &line : data) {
+        if (line.startsWith("+++ b/")) {
+            filePath = line.mid(6);
+            continue;
+        }
+
         if (line.startsWith("@@") == false)
             continue;
         auto newLine = line.mid(4);
@@ -290,7 +309,7 @@ void Project::onDiffReaded(QString filepath, QString data)
         oper.right.count = rightParts[1].toInt();
         recognizeOperationType(oper);
 
-        append(oper); // todo: удалить эту команду (она приватная)
+        append(filePath, oper); // todo: удалить эту команду (она приватная)
     }
 
     emit sgnDiffChanged();

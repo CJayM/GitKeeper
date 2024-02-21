@@ -73,6 +73,13 @@ void GitRepository::status()
 
         diffFuture.waitForFinished();
         emit sgnBlockStatusAndDiff(false);
+        auto results = diffFuture.result().result;        
+        emit sgnReceived(results.join("\n"), false);
+        QStringList splittedResult;
+        for (const auto &line : results) {
+            splittedResult.append(line.split("\n"));
+        }
+        emit sgnDiffsReaded(splittedResult);
 
         //        return std::make_pair(filepath, localFuture.result().result.join("\n"));
     });
@@ -167,15 +174,12 @@ void GitRepository::queryFile(QString filepath)
         [&](QString filepath) {
             auto future1 = readStagedOrCommitedFile(filepath);
             auto future2 = readCurrentFile(filepath);
-            auto future3 = readDiffFile(filepath);
 
             future1.waitForFinished();
             future2.waitForFinished();
-            future3.waitForFinished();
 
             emit sgnCurrentFileReaded(filepath, future2.result().second);
             emit sgnOriginalFileReaded(filepath, future1.result().second);
-            emit sgnDiffReaded(filepath, future3.result().second);
         },
         filepath);
 }

@@ -36,7 +36,7 @@ signals:
     void sgnLastMessageReady(QString msg);
     void sgnCurrentFileReaded(QString filepath, QString data);
     void sgnOriginalFileReaded(QString filepath, QString data);
-    void sgnDiffReaded(QString filepath, QString data);
+    void sgnDiffsReaded(QStringList data);
 
     void sgnBlockStatusAndDiff(
         bool isBlocked); // сигнал блокирования в связи с процессом получения статуса или diff
