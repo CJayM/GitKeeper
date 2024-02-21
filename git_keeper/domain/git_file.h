@@ -22,20 +22,19 @@ QChar stateToChar(FileState state);
 FileState charToState(QChar ch);
 
 struct GitFile {
-  QString name;
-  QDir path;
-  FileState indexState;
+    QString fullPath;
+    QString name;
+    QDir path;
+    FileState indexState;
   FileState workState;
   //  std::array<char, 4> submoduleState;
   QString submoduleState;
   //  std::array<char, 6> fileModeHead;
   QString fileModeHead;
   QString fileModeIndex;
-  QString fileModeWorkTree;
-  QString nameHead;
-  QString nameIndex;
-
-  QString fullPath() const;
+    QString fileModeWorkTree;
+    QString nameHead;
+    QString nameIndex;
 };
 
 struct CommandResult

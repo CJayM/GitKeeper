@@ -145,11 +145,10 @@ bool Project::hasNextFile() const
 
     bool finded = false;
     for (const auto &file : changedFiles_) {
-        auto fullPath = file.fullPath();
         if (finded) {
             return true;
         }
-        if (fullPath == currentFile_) {
+        if (file.fullPath == currentFile_) {
             finded = true;
             continue;
         }
@@ -165,14 +164,13 @@ bool Project::hasPrevFile() const
 
     QString prevFile;
     for (const auto &file : changedFiles_) {
-        auto fullPath = file.fullPath();
-        if (fullPath == currentFile_) {
+        if (file.fullPath == currentFile_) {
             if (prevFile.isEmpty() == false) {
                 return true;
             }
             break;
         }
-        prevFile = fullPath;
+        prevFile = file.fullPath;
     }
 
     return false;
@@ -184,19 +182,18 @@ bool Project::selectNextFile()
         return false;
 
     if (currentFile_.isEmpty() == true) {
-        selectCurrentFile(changedFiles_.first().fullPath());
+        selectCurrentFile(changedFiles_.first().fullPath);
         return true;
     }
 
     bool finded = false;
 
     for (const auto &file : changedFiles_) {
-        auto fullPath = file.fullPath();
         if (finded) {
-            selectCurrentFile(fullPath);
+            selectCurrentFile(file.fullPath);
             return true;
         }
-        if (fullPath == currentFile_) {
+        if (file.fullPath == currentFile_) {
             finded = true;
             continue;
         }
@@ -209,15 +206,14 @@ bool Project::selectPrevFile()
 {
     QString prevFile;
     for (const auto &file : changedFiles_) {
-        auto fullPath = file.fullPath();
-        if (fullPath == currentFile_) {
+        if (file.fullPath == currentFile_) {
             if (prevFile.isEmpty() == false) {
                 selectCurrentFile(prevFile);
                 return true;
             }
             break;
         }
-        prevFile = fullPath;
+        prevFile = file.fullPath;
     }
 
     return false;

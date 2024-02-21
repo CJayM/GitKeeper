@@ -235,15 +235,15 @@ QVector<GitFile> GitRepository::proccessGitStatus(QString data) {
           file.fileModeWorkTree = line.mid(24, 6);
           file.nameHead = line.mid(31, 40);
           file.nameIndex = line.mid(72, 40);
-          file.name = line.mid(113);
+          file.fullPath = line.mid(113);
       }
       if (line[0] == '?') {
-          file.name = line.mid(2);
+          file.fullPath = line.mid(2);
           file.indexState = FileState::UNTRACKED;
           file.workState = charToState(line[0]);
       }
 
-      auto res = file.name.split("/");
+      auto res = file.fullPath.split("/");
       file.name = res.last();
       if (res.size() > 0)
           file.path = res.mid(0, res.size() - 1).join(QDir::separator());
