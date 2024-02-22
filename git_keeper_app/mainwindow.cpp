@@ -83,8 +83,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     connect(diffs_, &Project::sgnSendedToGit, this, &MainWindow::onSendedToGit);
     connect(diffs_, &Project::sgnReceivedFromGit, this, &MainWindow::onReceivedFromGit);
     connect(diffs_, &Project::sgnLastMessageProcessed, this, &MainWindow::onReceivedLastMessage);
-    connect(diffs_, &Project::sgnAfterChanged, this, &MainWindow::onCurrentFileReaded);
-    connect(diffs_, &Project::sgnBeforeChanged, this, &MainWindow::onOriginalFileReaded);
+    connect(diffs_, &Project::sgnCurrentContentReloaded, this, &MainWindow::onCurrentFileReaded);
     connect(diffs_, &Project::sgnDiffsReloaded, this, &MainWindow::onDiffReaded);
     connect(diffs_, &Project::sgnCurrentFileChanged, this, &MainWindow::onCurrentFileChanged);
     connect(diffs_, &Project::sgnCurrentBlockChanged, this, &MainWindow::onCurrentBlockChanged);
@@ -265,7 +264,7 @@ void MainWindow::onCurrentFileChanged(QString path)
 
 void MainWindow::onCurrentBlockChanged(QString filePath)
 {
-    if (currentFilePath_ != filePath)
+    if ((currentFilePath_.isEmpty() == false) && (currentFilePath_ != filePath))
         return;
 
     auto oper = diffs_->getCurrentBlock();
@@ -275,21 +274,15 @@ void MainWindow::onCurrentBlockChanged(QString filePath)
         Q_ASSERT(oper != nullptr);
     }
 
-    auto block = ui->currentFileEdit->document()->findBlockByLineNumber(oper->right.line - 1);
-    if (block.isValid())
-        ui->currentFileEdit->setTextCursor(QTextCursor(block));
+    hightLightBlock(ui->originalFileEdit, oper->left);
+    hightLightBlock(ui->currentFileEdit, oper->right);
 }
 
-void MainWindow::onCurrentFileReaded(QString filepath, QString data)
+void MainWindow::onCurrentFileReaded(QString filepath, QString before, QString after)
 {
-    qDebug() << "?? onCurrentFileReaded" << filepath;
-    ui->currentFileEdit->setPlainText(data);
-}
-
-void MainWindow::onOriginalFileReaded(QString filepath, QString data)
-{
-    qDebug() << "?? onOriginalFileReaded" << filepath;
-    ui->originalFileEdit->setPlainText(data);
+    ui->originalFileEdit->setPlainText(before);
+    ui->currentFileEdit->setPlainText(after);
+    onCurrentBlockChanged(filepath);
 }
 
 void MainWindow::onDiffReaded()
@@ -317,4 +310,35 @@ void MainWindow::closeEvent(QCloseEvent *event)
     settings_.save();
 
     QWidget::closeEvent(event);
+}
+
+void hightLightBlock(QPlainTextEdit *widget, const DiffPos &diff)
+{
+    const auto &document = widget->document();
+    auto block = document->findBlockByLineNumber(diff.line - 1);
+    if (block.isValid() == false)
+        return;
+    auto end = document->findBlockByLineNumber(diff.line - 1 + diff.count - 1);
+
+    widget->setTextCursor(QTextCursor(block));
+    //    onOriginalFileVScrollBarChanged(oper->right.line - 1);
+
+    QList<QTextEdit::ExtraSelection> extraSelections;
+    auto pos = block.position();
+    QTextEdit::ExtraSelection selection;
+    selection.cursor = QTextCursor(document);
+    selection.cursor.setPosition(pos);
+    auto endPos = end.position() + end.length() - 1;
+    selection.cursor.setPosition(endPos, QTextCursor::KeepAnchor);
+    if (diff.type == DiffOperationType::ADD) {
+        selection.format.setBackground(QBrush(Qt::green));
+    }
+    if (diff.type == DiffOperationType::REMOVE) {
+        selection.format.setBackground(QBrush(Qt::red));
+    }
+    if (diff.type == DiffOperationType::REPLACE) {
+        selection.format.setBackground(QBrush(Qt::blue));
+    }
+    extraSelections.append(selection);
+    widget->setExtraSelections(extraSelections);
 }

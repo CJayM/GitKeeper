@@ -176,8 +176,9 @@ void GitRepository::queryFile(QString filepath)
             future1.waitForFinished();
             future2.waitForFinished();
 
-            emit sgnCurrentFileReaded(filepath, future2.result().second);
-            emit sgnOriginalFileReaded(filepath, future1.result().second);
+            emit sgnCurrentFuleContentReaded(filepath,
+                                             future1.result().second,
+                                             future2.result().second);            
         },
         filepath);
 }

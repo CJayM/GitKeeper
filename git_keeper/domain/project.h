@@ -38,8 +38,7 @@ signals:
     void sgnSendedToGit(QString data);
     void sgnReceivedFromGit(QString data, bool isError);
     void sgnLastMessageProcessed(QString data);
-    void sgnAfterChanged(QString filepath, QString data);
-    void sgnBeforeChanged(QString filepath, QString data);
+    void sgnCurrentContentReloaded(QString filepath, QString before, QString after);
     void sgnDiffsReloaded();
 
     void sgnCurrentFileChanged(QString filepath);
@@ -52,8 +51,7 @@ private slots:
     void onSendedToGit(QString data);
     void onReceivedFromGit(QString data, bool isError);
     void onReceivedLastMessage(QString data);
-    void onCurrentFileReaded(QString filepath, QString data);
-    void onOriginalFileReaded(QString filepath, QString data);
+    void onCurrentFileReaded(QString filepath, QString before, QString after);
     void onDiffsReaded(QStringList data);
 
 private:

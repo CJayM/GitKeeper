@@ -13,13 +13,13 @@ Project::Project(QString gitPath, QObject *parent) : QObject(parent), gitPath_(g
             this,
             &Project::onReceivedLastMessage);
     connect(gitRepository_,
-            &GitRepository::sgnCurrentFileReaded,
+            &GitRepository::sgnCurrentFuleContentReaded,
             this,
             &Project::onCurrentFileReaded);
     connect(gitRepository_,
-            &GitRepository::sgnOriginalFileReaded,
+            &GitRepository::sgnCurrentFuleContentReaded,
             this,
-            &Project::onOriginalFileReaded);
+            &Project::onCurrentFileReaded);
     connect(gitRepository_, &GitRepository::sgnDiffsReaded, this, &Project::onDiffsReaded);
 }
 
@@ -267,14 +267,9 @@ void Project::onReceivedLastMessage(QString data)
     emit sgnLastMessageProcessed(data);
 }
 
-void Project::onCurrentFileReaded(QString filepath, QString data)
+void Project::onCurrentFileReaded(QString filepath, QString before, QString after)
 {
-    emit sgnAfterChanged(filepath, data);
-}
-
-void Project::onOriginalFileReaded(QString filepath, QString data)
-{
-    emit sgnBeforeChanged(filepath, data);
+    emit sgnCurrentContentReloaded(filepath, before, after);
 }
 
 void Project::onDiffsReaded(QStringList data)

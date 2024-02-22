@@ -25,6 +25,7 @@ class SettingsDialog;
 class Highlighter;
 class QSplashScreen;
 class QItemSelectionModel;
+class QPlainTextEdit;
 
 class MainWindow : public QMainWindow {
   Q_OBJECT
@@ -52,8 +53,7 @@ public:
   void onCurrentFileVScrollBarChanged(int value);
   void onOriginalFileVScrollBarChanged(int value);
   void onCurrentFileChanged(QString path);
-  void onCurrentFileReaded(QString filepath, QString data);
-  void onOriginalFileReaded(QString filepath, QString data);
+  void onCurrentFileReaded(QString filepath, QString before, QString after);
   void onDiffReaded();
   void onCurrentBlockChanged(QString filePath);
   void onHasPrevBlockChanged(bool hasPrev);
@@ -82,3 +82,5 @@ public:
   protected:
   void closeEvent(QCloseEvent *);
 };
+
+void hightLightBlock(QPlainTextEdit *widget, const DiffPos &diff);

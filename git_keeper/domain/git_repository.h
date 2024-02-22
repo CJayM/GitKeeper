@@ -34,8 +34,7 @@ signals:
     void sgnResultReceived(QVector<GitFile> result);
     void sgnFinished();
     void sgnLastMessageReady(QString msg);
-    void sgnCurrentFileReaded(QString filepath, QString data);
-    void sgnOriginalFileReaded(QString filepath, QString data);
+    void sgnCurrentFuleContentReaded(QString filepath, QString before, QString after);
     void sgnDiffsReaded(QStringList data);
 
     void sgnBlockStatusAndDiff(
