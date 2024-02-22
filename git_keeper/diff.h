@@ -17,10 +17,11 @@ struct DiffPos
 
 struct DiffOperation
 {
+    QString filePath;
     DiffPos left;
     DiffPos right;
 };
 
 class GitRepository;
 
-void recognizeOperationType(DiffOperation &oper);
+void recognizeOperationType(DiffOperation *oper);

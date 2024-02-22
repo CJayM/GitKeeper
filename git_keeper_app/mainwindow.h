@@ -44,8 +44,8 @@ public:
   void onGitStatusFinished(QVector<GitFile> files);
   void onOpenSettingsDialog();
   void onShowAbout();
-  void onPrevChange();
-  void onNextChange();
+  void onPrevClick();
+  void onNextClick();
   void onSaveSettings();
   void onCommitTextChanged();
   void onAmnedChecked(bool checked);
@@ -55,9 +55,9 @@ public:
   void onCurrentFileReaded(QString filepath, QString data);
   void onOriginalFileReaded(QString filepath, QString data);
   void onDiffReaded();
-
-  void onPrevFileClicked();
-  void onNextFileClicked();
+  void onCurrentBlockChanged(QString filePath);
+  void onHasPrevBlockChanged(bool hasPrev);
+  void onHasNextBlockChanged(bool hasNext);
 
   private:
   Ui::MainWindow *ui;
@@ -66,6 +66,7 @@ public:
   GitFilesModel *stagedModel_ = nullptr;
   QString lastCommitMessage_ = "Amned text placed";
   QItemSelectionModel *selectionModel_ = nullptr;
+  QString currentFilePath_;
 
   Git *git_ = nullptr;
   QSplashScreen *splash_ = nullptr;

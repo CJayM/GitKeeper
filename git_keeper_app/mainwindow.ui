@@ -178,7 +178,7 @@
                </property>
                <item>
                 <widget class="QWidget" name="diffToolbar" native="true">
-                 <layout class="QHBoxLayout" name="horizontalLayout_4" stretch="0,0,0,0,0">
+                 <layout class="QHBoxLayout" name="horizontalLayout_4" stretch="0,0,0">
                   <property name="spacing">
                    <number>0</number>
                   </property>
@@ -195,20 +195,6 @@
                    <number>0</number>
                   </property>
                   <item>
-                   <widget class="QToolButton" name="prevFileBtn">
-                    <property name="text">
-                     <string>prevFile</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <widget class="QToolButton" name="nextFileBtn">
-                    <property name="text">
-                     <string>nextFile</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
                    <spacer name="horizontalSpacer_2">
                     <property name="orientation">
                      <enum>Qt::Horizontal</enum>
@@ -222,14 +208,14 @@
                    </spacer>
                   </item>
                   <item>
-                   <widget class="QToolButton" name="prevFileChangeBtn">
+                   <widget class="QToolButton" name="prevBlockBtn">
                     <property name="text">
                      <string>Prev</string>
                     </property>
                    </widget>
                   </item>
                   <item>
-                   <widget class="QToolButton" name="nextFileChangeBtn">
+                   <widget class="QToolButton" name="nextBlockBtn">
                     <property name="text">
                      <string>Next</string>
                     </property>
@@ -488,8 +474,8 @@
     <property name="title">
      <string>Изменения</string>
     </property>
-    <addaction name="nextFileChangeAction"/>
-    <addaction name="prevFileChangeAction"/>
+    <addaction name="nextBlockChangeAction"/>
+    <addaction name="prevBlockChangeAction"/>
    </widget>
    <addaction name="menu"/>
    <addaction name="menu_3"/>
@@ -591,7 +577,7 @@
     <string>О программе</string>
    </property>
   </action>
-  <action name="nextFileChangeAction">
+  <action name="nextBlockChangeAction">
    <property name="text">
     <string>Next</string>
    </property>
@@ -602,7 +588,7 @@
     <string>F6</string>
    </property>
   </action>
-  <action name="prevFileChangeAction">
+  <action name="prevBlockChangeAction">
    <property name="text">
     <string>Prev</string>
    </property>

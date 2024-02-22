@@ -4,21 +4,24 @@
 
 #include <QDebug>
 
-void recognizeOperationType(DiffOperation &oper)
+void recognizeOperationType(DiffOperation *oper)
 {
-    if (oper.left.count > 0 && oper.right.count == 0) {
-        oper.left.type = DiffOperationType::REMOVE;
-        oper.right.type = DiffOperationType::REMOVE;
+    if (oper == nullptr)
+        return;
+
+    if (oper->left.count > 0 && oper->right.count == 0) {
+        oper->left.type = DiffOperationType::REMOVE;
+        oper->right.type = DiffOperationType::REMOVE;
         return;
     }
 
-    if (oper.left.count == 0 && oper.right.count > 0) {
-        oper.left.type = DiffOperationType::ADD;
-        oper.right.type = DiffOperationType::ADD;
+    if (oper->left.count == 0 && oper->right.count > 0) {
+        oper->left.type = DiffOperationType::ADD;
+        oper->right.type = DiffOperationType::ADD;
         return;
     }
 
-    oper.left.type = DiffOperationType::REPLACE;
-    oper.right.type = DiffOperationType::ADD;
+    oper->left.type = DiffOperationType::REPLACE;
+    oper->right.type = DiffOperationType::ADD;
     return;
 }

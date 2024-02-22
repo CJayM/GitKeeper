@@ -51,12 +51,12 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     connect(ui->actionCommit, &QAction::triggered, this, &MainWindow::onCommitAction);
     connect(ui->actionOpenSettings, &QAction::triggered, this, &MainWindow::onOpenSettingsDialog);
     connect(ui->aboutAction, &QAction::triggered, this, &MainWindow::onShowAbout);
-    connect(ui->prevFileChangeAction, &QAction::triggered, this, &MainWindow::onPrevChange);
-    connect(ui->nextFileChangeAction, &QAction::triggered, this, &MainWindow::onNextChange);
+    connect(ui->prevBlockChangeAction, &QAction::triggered, this, &MainWindow::onPrevClick);
+    connect(ui->nextBlockChangeAction, &QAction::triggered, this, &MainWindow::onNextClick);
 
     ui->btnCommit->setDefaultAction(ui->actionCommit);
-    ui->prevFileChangeBtn->setDefaultAction(ui->prevFileChangeAction);
-    ui->nextFileChangeBtn->setDefaultAction(ui->nextFileChangeAction);
+    ui->prevBlockBtn->setDefaultAction(ui->prevBlockChangeAction);
+    ui->nextBlockBtn->setDefaultAction(ui->nextBlockChangeAction);
 
     connect(ui->btnClearLog, &QAbstractButton::clicked, this, [&]() { ui->logMessage->clear(); });
     connect(ui->commitMessageEdit, &QTextEdit::textChanged, this, &MainWindow::onCommitTextChanged);
@@ -82,12 +82,13 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     connect(diffs_, &Project::sgnLastMessageProcessed, this, &MainWindow::onReceivedLastMessage);
     connect(diffs_, &Project::sgnAfterChanged, this, &MainWindow::onCurrentFileReaded);
     connect(diffs_, &Project::sgnBeforeChanged, this, &MainWindow::onOriginalFileReaded);
-    connect(diffs_, &Project::sgnDiffChanged, this, &MainWindow::onDiffReaded);
+    connect(diffs_, &Project::sgnDiffsReloaded, this, &MainWindow::onDiffReaded);
     connect(diffs_, &Project::sgnCurrentFileChanged, this, &MainWindow::onCurrentFileChanged);
-    diffs_->status();
+    connect(diffs_, &Project::sgnCurrentBlockChanged, this, &MainWindow::onCurrentBlockChanged);
+    connect(diffs_, &Project::sgnHasPrevBlockChanged, this, &MainWindow::onHasPrevBlockChanged);
+    connect(diffs_, &Project::sgnHasNextBlockChanged, this, &MainWindow::onHasNextBlockChanged);
 
-    connect(ui->prevFileBtn, &QAbstractButton::clicked, this, &MainWindow::onPrevFileClicked);
-    connect(ui->nextFileBtn, &QAbstractButton::clicked, this, &MainWindow::onNextFileClicked);
+    diffs_->status();
 }
 
 MainWindow::~MainWindow()
@@ -144,7 +145,6 @@ void MainWindow::onGitStatusFinished(QVector<GitFile> files)
 {
     filesModel_->setFiles(files);
     stagedModel_->setFiles(files);
-    diffs_->selectNextFile();
 }
 
 void MainWindow::onOpenSettingsDialog()
@@ -159,37 +159,14 @@ void MainWindow::onShowAbout()
     splash_->showMessage(QString("Version %1").arg(APP_VERSION), Qt::AlignLeft, Qt::white);
 }
 
-void MainWindow::onPrevChange()
+void MainWindow::onPrevClick()
 {
-    ui->nextFileChangeAction->setEnabled(true);
-    auto oper = diffs_->getPrevChange();
-    if (oper.right.type == DiffOperationType::UNINITIALIZED) {
-        ui->prevFileChangeAction->setEnabled(false);
-        qDebug() << "End changes";
-        return;
-    }
-    ui->prevFileChangeAction->setEnabled(true);
-
-    qDebug() << "Scroll to " << oper.right.line;
-    auto block = ui->currentFileEdit->document()->findBlockByLineNumber(oper.right.line - 1);
-    ui->currentFileEdit->setTextCursor(QTextCursor(block));
+    diffs_->movePrevChange();
 }
 
-void MainWindow::onNextChange()
+void MainWindow::onNextClick()
 {
-    ui->prevFileChangeAction->setEnabled(true);
-
-    auto oper = diffs_->getNextChange();
-    if (oper.right.type == DiffOperationType::UNINITIALIZED) {
-        qDebug() << "End changes";
-        ui->nextFileChangeAction->setEnabled(false);
-        return;
-    }
-    ui->nextFileChangeAction->setEnabled(true);
-
-    qDebug() << "Scroll to " << oper.right.line;
-    auto block = ui->currentFileEdit->document()->findBlockByLineNumber(oper.right.line - 1);
-    ui->currentFileEdit->setTextCursor(QTextCursor(block));
+    diffs_->moveNextChange();
 }
 
 void MainWindow::onSaveSettings()
@@ -241,7 +218,23 @@ void MainWindow::onOriginalFileVScrollBarChanged(int value)
 
 void MainWindow::onCurrentFileChanged(QString path)
 {
-    qDebug() << "Current Changed" << path;
+    qDebug() << "Change current filer" << path;
+    if (path != currentFilePath_) {
+        currentFilePath_ = path;
+        onCurrentBlockChanged(path);
+
+        qDebug() << "Color diffs";
+
+        ui->originalFileEdit->clearDiffBlocks();
+        ui->currentFileEdit->clearDiffBlocks();
+
+        const auto diffs = diffs_->getCurrentFileDiffs();
+
+        for (const auto &oper : diffs) {
+            ui->originalFileEdit->addDiffBlock(oper->left);
+            ui->currentFileEdit->addDiffBlock(oper->right);
+        }
+    }
     auto indexes = filesModel_->match(filesModel_->index(0, 0, {}),
                                       GitFilesModel::FULL_PATH_ROLE,
                                       path,
@@ -256,37 +249,46 @@ void MainWindow::onCurrentFileChanged(QString path)
                                          | QItemSelectionModel::SelectionFlag::Rows);
 }
 
+void MainWindow::onCurrentBlockChanged(QString filePath)
+{
+    if (currentFilePath_ != filePath)
+        return;
+
+    auto oper = diffs_->getCurrentBlock();
+    if (oper == nullptr)
+        return;
+
+    auto block = ui->currentFileEdit->document()->findBlockByLineNumber(oper->right.line - 1);
+    if (block.isValid())
+        ui->currentFileEdit->setTextCursor(QTextCursor(block));
+}
+
 void MainWindow::onCurrentFileReaded(QString filepath, QString data)
 {
+    qDebug() << "?? onCurrentFileReaded" << filepath;
     ui->currentFileEdit->setPlainText(data);
 }
 
 void MainWindow::onOriginalFileReaded(QString filepath, QString data)
 {
+    qDebug() << "?? onOriginalFileReaded" << filepath;
     ui->originalFileEdit->setPlainText(data);
 }
 
 void MainWindow::onDiffReaded()
 {
-    ui->originalFileEdit->clearDiffBlocks();
-    ui->currentFileEdit->clearDiffBlocks();
-
-    const auto diffs = diffs_->getCurrentFileDiffs();
-
-    for (const auto &oper : diffs) {
-        ui->originalFileEdit->addDiffBlock(oper.left);
-        ui->currentFileEdit->addDiffBlock(oper.right);
-    }
+    qDebug() << "onDiffReaded";
+    diffs_->moveNextChange();
 }
 
-void MainWindow::onPrevFileClicked()
+void MainWindow::onHasPrevBlockChanged(bool hasPrev)
 {
-    diffs_->selectPrevFile();
+    ui->prevBlockChangeAction->setEnabled(hasPrev);
 }
 
-void MainWindow::onNextFileClicked()
+void MainWindow::onHasNextBlockChanged(bool hasNext)
 {
-    diffs_->selectNextFile();
+    ui->nextBlockChangeAction->setEnabled(hasNext);
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)

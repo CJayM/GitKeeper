@@ -79,9 +79,7 @@ void GitRepository::status()
         for (const auto &line : results) {
             splittedResult.append(line.split("\n"));
         }
-        emit sgnDiffsReaded(splittedResult);
-
-        //        return std::make_pair(filepath, localFuture.result().result.join("\n"));
+        emit sgnDiffsReaded(splittedResult);        
     });
 }
 

@@ -36,19 +36,27 @@ void Project::setPath(QDir path)
 
 void Project::clearDiffs()
 {
-    for (auto &oper : operations_.values())
-        oper.clear();
-    operations_.clear();
+    for (auto &arr : operations_.values()) {
+        for (auto &oper : arr)
+            delete oper;
+        arr.clear();
+    }
 
-    currentOperationIndex = -1;
+    operations_.clear();
+    operationsList_.clear();
+    currentOperationIndex_ = -1;
 }
 
-void Project::append(QString filePath, DiffOperation oper)
+void Project::addDiff(DiffOperation *oper)
 {
-    if (operations_.contains(filePath) == false)
-        operations_[filePath] = {};
+    if (oper == nullptr)
+        return;
 
-    operations_[filePath].append(oper);
+    if (operations_.contains(oper->filePath) == false)
+        operations_[oper->filePath] = {};
+
+    operations_[oper->filePath].append(oper);
+    operationsList_.append(operations_[oper->filePath].last());
 }
 
 int Project::getMappedLeftPos(int pos) const
@@ -107,129 +115,106 @@ int Project::getMappedRightPos(int pos) const
     //    return result;
 }
 
-const QVector<DiffOperation> Project::getCurrentFileDiffs() const
+const QVector<DiffOperation *> Project::getCurrentFileDiffs() const
 {
     return operations_[currentFile_];
 }
 
-DiffOperation Project::getPrevChange()
+DiffOperation *Project::getCurrentBlock()
 {
-    currentOperationIndex -= 1;
-    if (currentOperationIndex < 0) {
-        if (hasPrevFile()) {
-            selectPrevFile();
-            currentOperationIndex = -1;
-            return getNextChange();
-        }
-        return {};
-    }
+    if (operationsList_.isEmpty())
+        return nullptr;
+    if (currentOperationIndex_ >= operationsList_.size())
+        return nullptr;
 
-    return operations_[currentFile_][currentOperationIndex];
+    if (currentOperationIndex_ == -1)
+        return nullptr;
+
+    return operationsList_[currentOperationIndex_];
 }
 
-DiffOperation Project::getNextChange()
+void Project::movePrevChange()
 {
-    currentOperationIndex += 1;
-    if (currentOperationIndex >= operations_[currentFile_].size()) {
-        if (hasNextFile()) {
-            selectNextFile();
-            currentOperationIndex = -1;
-            return getNextChange();
-        }
-
-        return {};
+    if (operationsList_.isEmpty()) {
+        emit sgnHasNextBlockChanged(false);
+        emit sgnHasPrevBlockChanged(false);
+        return;
     }
 
-    return operations_[currentFile_][currentOperationIndex];
+    if (currentOperationIndex_ == 0)
+        return;
+
+    QString oldPath;
+    if (currentOperationIndex_ != -1)
+        oldPath = operationsList_[currentOperationIndex_]->filePath;
+
+    if (currentOperationIndex_ == -1)
+        currentOperationIndex_ = 0;
+    else
+        --currentOperationIndex_;
+
+    auto oper = operationsList_[currentOperationIndex_];
+    emit sgnCurrentBlockChanged(oper->filePath);
+
+    if (oper->filePath != oldPath)
+        selectCurrentFile(oper->filePath);
+
+    if (currentOperationIndex_ == 0)
+        emit sgnHasPrevBlockChanged(false);
+    else
+        emit sgnHasPrevBlockChanged(true);
+
+    if (currentOperationIndex_ == (operationsList_.size() - 1))
+        emit sgnHasNextBlockChanged(false);
+    else
+        emit sgnHasNextBlockChanged(true);
+}
+
+void Project::moveNextChange()
+{
+    if (operationsList_.isEmpty()) {
+        emit sgnHasNextBlockChanged(false);
+        emit sgnHasPrevBlockChanged(false);
+        return;
+    }
+
+    if (currentOperationIndex_ == (operationsList_.size() - 1))
+        return;
+
+    QString oldPath;
+    if (currentOperationIndex_ != -1)
+        oldPath = operationsList_[currentOperationIndex_]->filePath;
+
+    if (currentOperationIndex_ == -1)
+        currentOperationIndex_ = 0;
+    else
+        ++currentOperationIndex_;
+
+    auto oper = operationsList_[currentOperationIndex_];
+    emit sgnCurrentBlockChanged(oper->filePath);
+
+    if (oper->filePath != oldPath)
+        selectCurrentFile(oper->filePath);
+
+    if (currentOperationIndex_ == 0)
+        emit sgnHasPrevBlockChanged(false);
+    else
+        emit sgnHasPrevBlockChanged(true);
+
+    if (currentOperationIndex_ == (operationsList_.size() - 1))
+        emit sgnHasNextBlockChanged(false);
+    else
+        emit sgnHasNextBlockChanged(true);
 }
 
 void Project::selectCurrentFile(QString filepath)
 {
+    if (currentFile_ == filepath)
+        return;
+
     currentFile_ = filepath;
-    qDebug() << "Current file:" << filepath;
     gitRepository_->queryFile(filepath);
     emit sgnCurrentFileChanged(filepath);
-}
-
-bool Project::hasNextFile() const
-{
-    if (changedFiles_.isEmpty())
-        return false;
-
-    bool finded = false;
-    for (const auto &file : changedFiles_) {
-        if (finded) {
-            return true;
-        }
-        if (file.fullPath == currentFile_) {
-            finded = true;
-            continue;
-        }
-    }
-
-    return false;
-}
-
-bool Project::hasPrevFile() const
-{
-    if (changedFiles_.isEmpty())
-        return false;
-
-    QString prevFile;
-    for (const auto &file : changedFiles_) {
-        if (file.fullPath == currentFile_) {
-            if (prevFile.isEmpty() == false) {
-                return true;
-            }
-            break;
-        }
-        prevFile = file.fullPath;
-    }
-
-    return false;
-}
-
-bool Project::selectNextFile()
-{
-    if (changedFiles_.isEmpty())
-        return false;
-
-    if (currentFile_.isEmpty() == true) {
-        selectCurrentFile(changedFiles_.first().fullPath);
-        return true;
-    }
-
-    bool finded = false;
-
-    for (const auto &file : changedFiles_) {
-        if (finded) {
-            selectCurrentFile(file.fullPath);
-            return true;
-        }
-        if (file.fullPath == currentFile_) {
-            finded = true;
-            continue;
-        }
-    }
-
-    return false;
-}
-
-bool Project::selectPrevFile()
-{
-    QString prevFile;
-    for (const auto &file : changedFiles_) {
-        if (file.fullPath == currentFile_) {
-            if (prevFile.isEmpty() == false) {
-                selectCurrentFile(prevFile);
-                return true;
-            }
-            break;
-        }
-        prevFile = file.fullPath;
-    }
-
-    return false;
 }
 
 void Project::status()
@@ -302,15 +287,16 @@ void Project::onDiffsReaded(QStringList data)
         if (rightParts.size() == 1)
             rightParts << "1";
 
-        DiffOperation oper;
-        oper.left.line = leftParts[0].toInt();
-        oper.left.count = leftParts[1].toInt();
-        oper.right.line = rightParts[0].toInt();
-        oper.right.count = rightParts[1].toInt();
+        auto oper = new DiffOperation();
+        oper->filePath = filePath;
+        oper->left.line = leftParts[0].toInt();
+        oper->left.count = leftParts[1].toInt();
+        oper->right.line = rightParts[0].toInt();
+        oper->right.count = rightParts[1].toInt();
         recognizeOperationType(oper);
 
-        append(filePath, oper); // todo: удалить эту команду (она приватная)
+        addDiff(oper); // todo: удалить эту команду (она приватная)
     }
 
-    emit sgnDiffChanged();
+    emit sgnDiffsReloaded();
 }

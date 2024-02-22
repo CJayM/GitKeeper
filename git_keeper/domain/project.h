@@ -14,19 +14,18 @@ public:
     void setPath(QDir path);
 
     void clearDiffs();
-    void append(QString filePath, DiffOperation oper);
+    void addDiff(DiffOperation *oper);
+
     int getMappedLeftPos(int pos) const;
     int getMappedRightPos(int pos) const;
 
-    const QVector<DiffOperation> getCurrentFileDiffs() const;
+    const QVector<DiffOperation *> getCurrentFileDiffs() const;
+    DiffOperation *getCurrentBlock();
 
-    DiffOperation getPrevChange();
-    DiffOperation getNextChange();
+    void movePrevChange();
+    void moveNextChange();
+
     void selectCurrentFile(QString filepath);
-    bool hasNextFile() const;
-    bool hasPrevFile() const;
-    bool selectNextFile();
-    bool selectPrevFile();
 
     void status();
     void commit(QString message, bool isAmned);
@@ -39,8 +38,12 @@ signals:
     void sgnLastMessageProcessed(QString data);
     void sgnAfterChanged(QString filepath, QString data);
     void sgnBeforeChanged(QString filepath, QString data);
-    void sgnDiffChanged();
+    void sgnDiffsReloaded();
+
     void sgnCurrentFileChanged(QString filepath);
+    void sgnCurrentBlockChanged(QString filepath);
+    void sgnHasNextBlockChanged(bool hasNext);
+    void sgnHasPrevBlockChanged(bool hasPrev);
 
 private slots:
     void onGitStatusFinished(QVector<GitFile> result);
@@ -52,11 +55,12 @@ private slots:
     void onDiffsReaded(QStringList data);
 
 private:
-    int currentOperationIndex = -1;
     QString currentFile_;
     QString gitPath_;
     GitRepository *gitRepository_ = nullptr;
 
-    QVector<GitFile> changedFiles_;
-    QHash<QString, QVector<DiffOperation>> operations_;
+    QVector<GitFile> changedFiles_;                       // result of "status" command
+    QHash<QString, QVector<DiffOperation *>> operations_; // result of "diff" command
+    QList<DiffOperation *> operationsList_;
+    int currentOperationIndex_ = -1;
 };
