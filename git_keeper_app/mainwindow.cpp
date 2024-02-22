@@ -117,6 +117,8 @@ void MainWindow::onCurrentFileIndexChanged(const QModelIndex &current, const QMo
     auto filepath = filesModel_
                         ->data(current.sibling(current.row(), 0), GitFilesModel::FULL_PATH_ROLE)
                         .toString();
+
+    diffs_->clearCurrentBlockIndex();
     diffs_->selectCurrentFile(filepath);
 }
 
@@ -267,8 +269,11 @@ void MainWindow::onCurrentBlockChanged(QString filePath)
         return;
 
     auto oper = diffs_->getCurrentBlock();
-    if (oper == nullptr)
-        return;
+    if (oper == nullptr) {
+        diffs_->setBlockForFile(filePath);
+        oper = diffs_->getCurrentBlock();
+        Q_ASSERT(oper != nullptr);
+    }
 
     auto block = ui->currentFileEdit->document()->findBlockByLineNumber(oper->right.line - 1);
     if (block.isValid())

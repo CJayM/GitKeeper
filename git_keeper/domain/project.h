@@ -21,10 +21,12 @@ public:
 
     const QVector<DiffOperation *> getCurrentFileDiffs() const;
     DiffOperation *getCurrentBlock();
+    void setBlockForFile(const QString &filePath);
 
     void movePrevChange();
     void moveNextChange();
 
+    void clearCurrentBlockIndex();
     void selectCurrentFile(QString filepath);
 
     void status();

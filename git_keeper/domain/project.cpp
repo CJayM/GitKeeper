@@ -133,6 +133,15 @@ DiffOperation *Project::getCurrentBlock()
     return operationsList_[currentOperationIndex_];
 }
 
+void Project::setBlockForFile(const QString &filePath)
+{
+    if (operations_.contains(filePath) == false)
+        return;
+
+    auto block = operations_[filePath].first();
+    currentOperationIndex_ = operationsList_.indexOf(block);
+}
+
 void Project::movePrevChange()
 {
     if (operationsList_.isEmpty()) {
@@ -205,6 +214,11 @@ void Project::moveNextChange()
         emit sgnHasNextBlockChanged(false);
     else
         emit sgnHasNextBlockChanged(true);
+}
+
+void Project::clearCurrentBlockIndex()
+{
+    currentOperationIndex_ = -1;
 }
 
 void Project::selectCurrentFile(QString filepath)
