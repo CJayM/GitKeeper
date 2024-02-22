@@ -15,6 +15,7 @@ RC_ICONS = resources/app_icon_64.ico
 
 
 SOURCES += \
+    app_palette.cpp \
     app_settings.cpp \
     widgets/code_editor.cpp \    
     highlighter.cpp \
@@ -25,6 +26,7 @@ SOURCES += \
     widgets/line_number_area.cpp
 
 HEADERS += \
+    app_palette.h \
     app_settings.h \
     widgets/code_editor.h \    
     highlighter.h \

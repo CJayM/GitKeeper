@@ -10,6 +10,7 @@ enum class DiffOperationType { UNINITIALIZED = -1, UNKNOWN = 0, REMOVE, ADD, REP
 
 struct DiffPos
 {
+    int id;
     int line = -1;
     int count = -1;
     DiffOperationType type = DiffOperationType::UNINITIALIZED;

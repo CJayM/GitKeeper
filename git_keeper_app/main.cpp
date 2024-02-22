@@ -1,3 +1,4 @@
+#include "app_palette.h"
 #include "mainwindow.h"
 
 #include <QApplication>

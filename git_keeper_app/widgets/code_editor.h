@@ -16,6 +16,7 @@ public:
 
     void clearDiffBlocks();
     void addDiffBlock(DiffPos block);
+    void setCurrentBlock(const DiffPos &diff);
 
 protected:
     void resizeEvent(QResizeEvent *event) override;
@@ -27,6 +28,7 @@ private slots:
 private:
     QWidget *lineNumberArea_;
     QVector<DiffPos> diffBlocks_;
+    int currentDiffBlockIndex_ = -1;
 
     // QPlainTextEdit interface
 protected:

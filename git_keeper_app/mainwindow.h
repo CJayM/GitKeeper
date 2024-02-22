@@ -25,7 +25,7 @@ class SettingsDialog;
 class Highlighter;
 class QSplashScreen;
 class QItemSelectionModel;
-class QPlainTextEdit;
+class CodeEditor;
 
 class MainWindow : public QMainWindow {
   Q_OBJECT
@@ -83,4 +83,4 @@ public:
   void closeEvent(QCloseEvent *);
 };
 
-void hightLightBlock(QPlainTextEdit *widget, const DiffPos &diff);
+void hightLightBlock(CodeEditor *widget, const DiffPos &diff);

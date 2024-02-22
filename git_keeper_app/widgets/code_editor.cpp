@@ -1,6 +1,7 @@
 #include "code_editor.h"
 #include "line_number_area.h"
 
+#include <app_palette.h>
 #include <QDebug>
 #include <QFont>
 #include <QPaintEvent>
@@ -65,11 +66,17 @@ int CodeEditor::lineNumberAreaWidth() const
 void CodeEditor::clearDiffBlocks()
 {
     diffBlocks_.clear();
+    currentDiffBlockIndex_ = -1;
 }
 
 void CodeEditor::addDiffBlock(DiffPos block)
 {
     diffBlocks_ << block;
+}
+
+void CodeEditor::setCurrentBlock(const DiffPos &diff)
+{
+    currentDiffBlockIndex_ = diff.id;
 }
 
 void CodeEditor::resizeEvent(QResizeEvent *event)
@@ -104,6 +111,9 @@ void CodeEditor::paintEvent(QPaintEvent *e)
 
     auto offset = contentOffset().toPoint();
 
+    auto lineBrush = AppPalette::DiffAddedLineBrush;
+    auto borderBrush = AppPalette::DiffAddedLineDarkBrush;
+
     for (const auto &diff : qAsConst(diffBlocks_)) {
         auto block = doc->findBlockByLineNumber(diff.line - 1);
         block = doc->findBlockByNumber(block.firstLineNumber());
@@ -114,8 +124,7 @@ void CodeEditor::paintEvent(QPaintEvent *e)
             for (int i = 0; i < diff.count; ++i) {
                 auto blockEnd = doc->findBlockByLineNumber(diff.line - 1 + i);
                 blockEnd = doc->findBlockByNumber(blockEnd.firstLineNumber());
-                auto geoEnd = blockBoundingGeometry(blockEnd).toRect();
-                //                geoEnd.adjust(0, 2, 0, 2);
+                auto geoEnd = blockBoundingGeometry(blockEnd).toRect();                
                 if (rect.intersects(geoEnd))
                     geo.setBottom(geoEnd.bottom());
             }
@@ -127,55 +136,52 @@ void CodeEditor::paintEvent(QPaintEvent *e)
             newRect.adjust(0, 2, 0, 2);
 
             if (diff.type == DiffOperationType::ADD)
-                painter.fillRect(newRect, QColor(Qt::green).lighter(160));
+                painter.fillRect(newRect, AppPalette::DiffAddedLineBrush);
 
             if (diff.type == DiffOperationType::NOTHINK)
-                painter.fillRect(newRect, QColor(Qt::darkGray));
+                painter.fillRect(newRect, AppPalette::DiffAddedLineBrush);
 
             if (diff.type == DiffOperationType::REMOVE)
-                painter.fillRect(newRect, QColor(Qt::red).lighter(160));
+                painter.fillRect(newRect, AppPalette::DiffRemovedLineBrush);
 
             if (diff.type == DiffOperationType::REPLACE)
-                painter.fillRect(newRect, QColor(Qt::blue).lighter(160));
-
-            continue;
+                painter.fillRect(newRect, AppPalette::DiffUpdatedLineBrush);
         }
 
         if (rect.intersects(geo) == false)
             continue;
 
-        if (diff.type == DiffOperationType::ADD)
-            painter.fillRect(geo, QColor(Qt::green).lighter(160));
-        if (diff.type == DiffOperationType::REMOVE)
-            painter.fillRect(geo, QColor(Qt::red).lighter(160));
-        if (diff.type == DiffOperationType::REPLACE)
-            painter.fillRect(geo, QColor(Qt::blue).lighter(160));
-        if (diff.type == DiffOperationType::NOTHINK)
-            painter.fillRect(geo, QColor(Qt::gray).lighter(160));
+        if (diff.type == DiffOperationType::ADD) {
+            lineBrush = AppPalette::DiffAddedLineBrush;
+            borderBrush = AppPalette::DiffAddedLineDarkBrush;
+        }
+
+        if (diff.type == DiffOperationType::REMOVE) {
+            lineBrush = AppPalette::DiffRemovedLineBrush;
+            borderBrush = AppPalette::DiffRemovedLineDarkBrush;
+        }
+        if (diff.type == DiffOperationType::REPLACE) {
+            lineBrush = AppPalette::DiffUpdatedLineBrush;
+            borderBrush = AppPalette::DiffUpdatedLineDarkBrush;
+        }
+        if (diff.type == DiffOperationType::NOTHINK) {
+            lineBrush = AppPalette::DiffNothinkLineBrush;
+            borderBrush = AppPalette::DiffNothinkLineDarkBrush;
+        }
+
+        if (diff.count != 0) {
+            painter.fillRect(geo, lineBrush);
+        }
+
+        if (diff.id == currentDiffBlockIndex_) {
+            if (diff.count == 0) {
+                geo.setTop(geo.bottom() + 3);
+                geo.adjust(0, 0, 0, -1);
+            }
+            geo.setRight(geo.left() + 4);
+            painter.fillRect(geo, borderBrush);
+        }
     }
 
     QPlainTextEdit::paintEvent(e);
-
-    //    QTextBlock block = firstVisibleBlock();
-    //    int blockNumber = block.blockNumber();
-    //    int top = qRound(blockBoundingGeometry(block).translated(contentOffset()).top());
-    //    int bottom = top + qRound(blockBoundingRect(block).height());
-
-    //    while (block.isValid() && top <= e->rect().bottom()) {
-    //        if (block.isVisible() && bottom >= e->rect().top()) {
-    //            QString number = QString::number(blockNumber + 1);
-    //            painter.setPen(Qt::lightGray);
-    //            painter.drawText(-2,
-    //                             top,
-    //                             lineNumberArea_->width(),
-    //                             fontMetrics().height(),
-    //                             Qt::AlignRight,
-    //                             number);
-    //        }
-
-    //        block = block.next();
-    //        top = bottom;
-    //        bottom = top + qRound(blockBoundingRect(block).height());
-    //        ++blockNumber;
-    //    }
 }

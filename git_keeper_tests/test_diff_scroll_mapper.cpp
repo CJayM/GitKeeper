@@ -11,10 +11,10 @@ void DiffScrollMapper_Test::test_mapped_pos()
 
     QString path = "new_file.cpp";
     Project diffs("");
-    diffs.addDiff(new DiffOperation{path, {10, 1, REPLACE}, {10, 1, REPLACE}});
-    diffs.addDiff(new DiffOperation{path, {20, 1, REPLACE}, {30, 1, REPLACE}});
-    diffs.addDiff(new DiffOperation{path, {32, 1, REPLACE}, {48, 1, REPLACE}});
-    diffs.addDiff(new DiffOperation{path, {64, 1, REPLACE}, {64, 1, REPLACE}});
+    diffs.addDiff(new DiffOperation{path, {0, 10, 1, REPLACE}, {0, 10, 1, REPLACE}});
+    diffs.addDiff(new DiffOperation{path, {1, 20, 1, REPLACE}, {1, 30, 1, REPLACE}});
+    diffs.addDiff(new DiffOperation{path, {2, 32, 1, REPLACE}, {2, 48, 1, REPLACE}});
+    diffs.addDiff(new DiffOperation{path, {3, 64, 1, REPLACE}, {3, 64, 1, REPLACE}});
 
     QCOMPARE(diffs.getMappedLeftPos(0), 0);
     QCOMPARE(diffs.getMappedLeftPos(1), 1);

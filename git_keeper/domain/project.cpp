@@ -277,6 +277,7 @@ void Project::onDiffsReaded(QStringList data)
     clearDiffs();
 
     QString filePath;
+    int id = 0;
     for (const auto &line : data) {
         if (line.startsWith("+++ b/")) {
             filePath = line.mid(6);
@@ -298,13 +299,16 @@ void Project::onDiffsReaded(QStringList data)
 
         auto oper = new DiffOperation();
         oper->filePath = filePath;
+        oper->left.id = id;
         oper->left.line = leftParts[0].toInt();
         oper->left.count = leftParts[1].toInt();
+        oper->right.id = id;
         oper->right.line = rightParts[0].toInt();
         oper->right.count = rightParts[1].toInt();
         recognizeOperationType(oper);
 
         addDiff(oper); // todo: удалить эту команду (она приватная)
+        ++id;
     }
 
     emit sgnDiffsReloaded();

@@ -3,6 +3,7 @@
 #include "settings_dialog.h"
 #include "widgets/code_editor.h"
 
+#include "app_palette.h"
 #include "domain/git_file.h"
 #include "models/git_files_model.h"
 #include "ui_mainwindow.h"
@@ -312,16 +313,20 @@ void MainWindow::closeEvent(QCloseEvent *event)
     QWidget::closeEvent(event);
 }
 
-void hightLightBlock(QPlainTextEdit *widget, const DiffPos &diff)
+void hightLightBlock(CodeEditor *widget, const DiffPos &diff)
 {
     const auto &document = widget->document();
     auto block = document->findBlockByLineNumber(diff.line - 1);
     if (block.isValid() == false)
         return;
-    auto end = document->findBlockByLineNumber(diff.line - 1 + diff.count - 1);
 
+    widget->setCurrentBlock(diff);
     widget->setTextCursor(QTextCursor(block));
+    if (diff.count == 0)
+        return;
+
     //    onOriginalFileVScrollBarChanged(oper->right.line - 1);
+    auto end = document->findBlockByLineNumber(diff.line - 1 + diff.count - 1);
 
     QList<QTextEdit::ExtraSelection> extraSelections;
     auto pos = block.position();
@@ -330,15 +335,21 @@ void hightLightBlock(QPlainTextEdit *widget, const DiffPos &diff)
     selection.cursor.setPosition(pos);
     auto endPos = end.position() + end.length() - 1;
     selection.cursor.setPosition(endPos, QTextCursor::KeepAnchor);
-    if (diff.type == DiffOperationType::ADD) {
-        selection.format.setBackground(QBrush(Qt::green));
-    }
-    if (diff.type == DiffOperationType::REMOVE) {
-        selection.format.setBackground(QBrush(Qt::red));
-    }
-    if (diff.type == DiffOperationType::REPLACE) {
-        selection.format.setBackground(QBrush(Qt::blue));
-    }
+
+    qDebug() << "FILL" << diff.id << diff.line << diff.count << static_cast<int>(diff.type);
+
+    if (diff.type == DiffOperationType::ADD)
+        selection.format.setBackground(AppPalette::DiffAddedLineExtraSelectionBrush);
+
+    if (diff.type == DiffOperationType::REMOVE)
+        selection.format.setBackground(AppPalette::DiffRemovedLineExtraSelectionBrush);
+
+    if (diff.type == DiffOperationType::REPLACE)
+        selection.format.setBackground(AppPalette::DiffUpdatedLineExtraSelectionBrush);
+
+    if (diff.type == DiffOperationType::NOTHINK)
+        selection.format.setBackground(AppPalette::DiffNothinkLineExtraSelectionBrush);
+
     extraSelections.append(selection);
     widget->setExtraSelections(extraSelections);
 }
