@@ -17,6 +17,8 @@
 
 #include "domain/git_repository.h"
 
+const char *SELECTION_CHANGED_FROM_CODE = "SELECTION_CHANGED_FROM_CODE";
+
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
@@ -42,7 +44,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     connect(selectionModel_,
             &QItemSelectionModel::currentChanged,
             this,
-            &MainWindow::onCurrentFileIndexChanged);
+            &MainWindow::onCurrentFileIndexChanged,
+            Qt::DirectConnection);
 
     QPixmap pixmap(":/resources/splash.png");
     splash_ = new QSplashScreen(this, pixmap);
@@ -101,6 +104,10 @@ MainWindow::~MainWindow()
 
 void MainWindow::onCurrentFileIndexChanged(const QModelIndex &current, const QModelIndex &previous)
 {
+    auto isFromCode = selectionModel_->property(SELECTION_CHANGED_FROM_CODE).toBool();
+    if (isFromCode)
+        return;
+
     if (current.isValid() == false) {
         ui->originalFileEdit->clear();
         ui->currentFileEdit->clear();
@@ -238,15 +245,20 @@ void MainWindow::onCurrentFileChanged(QString path)
     auto indexes = filesModel_->match(filesModel_->index(0, 0, {}),
                                       GitFilesModel::FULL_PATH_ROLE,
                                       path,
+
                                       1);
+    selectionModel_->setProperty(SELECTION_CHANGED_FROM_CODE, true);
     if (indexes.isEmpty()) {
         selectionModel_->setCurrentIndex({}, QItemSelectionModel::SelectionFlag::Clear);
+        selectionModel_->setProperty(SELECTION_CHANGED_FROM_CODE, false);
         return;
     }
+    selectionModel_->setProperty(SELECTION_CHANGED_FROM_CODE, true);
     selectionModel_->setCurrentIndex(indexes.first(),
                                      QItemSelectionModel::SelectionFlag::ClearAndSelect
                                          | QItemSelectionModel::SelectionFlag::Current
                                          | QItemSelectionModel::SelectionFlag::Rows);
+    selectionModel_->setProperty(SELECTION_CHANGED_FROM_CODE, false);
 }
 
 void MainWindow::onCurrentBlockChanged(QString filePath)
