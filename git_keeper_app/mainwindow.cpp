@@ -76,6 +76,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
             &QScrollBar::valueChanged,
             this,
             &MainWindow::onOriginalFileVScrollBarChanged);
+    connect(ui->currentFileEdit,
+            &CodeEditor::sgnScrolledToBlock,
+            this,
+            &MainWindow::onAfterScrolledToBlock);
 
     diffs_ = new Project(settings_.gitPath, this);
     diffs_->setPath(QDir("D:\\develop\\git_keeper\\GitKeeper"));
@@ -302,6 +306,18 @@ void MainWindow::onHasNextBlockChanged(bool hasNext)
     ui->nextBlockChangeAction->setEnabled(hasNext);
 }
 
+void MainWindow::onAfterScrolledToBlock(int id)
+{
+    for (const auto &diff : diffs_->getCurrentFileDiffs()) {
+        if (diff->right.id < id)
+            continue;
+        if (diff->right.id > id)
+            break;
+
+        diffs_->setCurrentBlock(id);
+    }
+}
+
 void MainWindow::closeEvent(QCloseEvent *event)
 {
     settings_.geometry = saveGeometry();
@@ -335,8 +351,6 @@ void hightLightBlock(CodeEditor *widget, const DiffPos &diff)
     selection.cursor.setPosition(pos);
     auto endPos = end.position() + end.length() - 1;
     selection.cursor.setPosition(endPos, QTextCursor::KeepAnchor);
-
-    qDebug() << "FILL" << diff.id << diff.line << diff.count << static_cast<int>(diff.type);
 
     if (diff.type == DiffOperationType::ADD)
         selection.format.setBackground(AppPalette::DiffAddedLineExtraSelectionBrush);

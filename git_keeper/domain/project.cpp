@@ -153,30 +153,7 @@ void Project::movePrevChange()
     if (currentOperationIndex_ == 0)
         return;
 
-    QString oldPath;
-    if (currentOperationIndex_ != -1)
-        oldPath = operationsList_[currentOperationIndex_]->filePath;
-
-    if (currentOperationIndex_ == -1)
-        currentOperationIndex_ = 0;
-    else
-        --currentOperationIndex_;
-
-    auto oper = operationsList_[currentOperationIndex_];
-    emit sgnCurrentBlockChanged(oper->filePath);
-
-    if (oper->filePath != oldPath)
-        selectCurrentFile(oper->filePath);
-
-    if (currentOperationIndex_ == 0)
-        emit sgnHasPrevBlockChanged(false);
-    else
-        emit sgnHasPrevBlockChanged(true);
-
-    if (currentOperationIndex_ == (operationsList_.size() - 1))
-        emit sgnHasNextBlockChanged(false);
-    else
-        emit sgnHasNextBlockChanged(true);
+    setCurrentBlock(currentOperationIndex_ != -1 ? currentOperationIndex_ - 1 : 0);
 }
 
 void Project::moveNextChange()
@@ -190,6 +167,11 @@ void Project::moveNextChange()
     if (currentOperationIndex_ == (operationsList_.size() - 1))
         return;
 
+    setCurrentBlock(currentOperationIndex_ != -1 ? currentOperationIndex_ + 1 : 0);
+}
+
+void Project::setCurrentBlock(int id)
+{
     QString oldPath;
     if (currentOperationIndex_ != -1)
         oldPath = operationsList_[currentOperationIndex_]->filePath;
@@ -197,7 +179,7 @@ void Project::moveNextChange()
     if (currentOperationIndex_ == -1)
         currentOperationIndex_ = 0;
     else
-        ++currentOperationIndex_;
+        currentOperationIndex_ = id;
 
     auto oper = operationsList_[currentOperationIndex_];
     emit sgnCurrentBlockChanged(oper->filePath);

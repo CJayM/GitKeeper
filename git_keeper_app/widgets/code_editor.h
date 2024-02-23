@@ -21,9 +21,13 @@ public:
 protected:
     void resizeEvent(QResizeEvent *event) override;
 
+signals:
+    void sgnScrolledToBlock(int id);
+
 private slots:
     void updateLineNumberAreaWidth(int newBlockCount);
     void updateLineNumberArea(const QRect &rect, int dy);
+    void onVScrollBarChanged(int value);
 
 private:
     QWidget *lineNumberArea_;

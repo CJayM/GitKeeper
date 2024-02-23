@@ -6,6 +6,7 @@
 #include <QFont>
 #include <QPaintEvent>
 #include <QPainter>
+#include <QScrollBar>
 #include <QTextBlock>
 
 CodeEditor::CodeEditor(QWidget *parent) : QPlainTextEdit(parent)
@@ -17,6 +18,9 @@ CodeEditor::CodeEditor(QWidget *parent) : QPlainTextEdit(parent)
 
     connect(this, &CodeEditor::blockCountChanged, this, &CodeEditor::updateLineNumberAreaWidth);
     connect(this, &CodeEditor::updateRequest, this, &CodeEditor::updateLineNumberArea);
+
+    connect(verticalScrollBar(), &QScrollBar::valueChanged, this, &CodeEditor::onVScrollBarChanged);
+    setCenterOnScroll(true);
 
     updateLineNumberAreaWidth(0);
 }
@@ -100,6 +104,28 @@ void CodeEditor::updateLineNumberArea(const QRect &rect, int dy)
 
     if (rect.contains(viewport()->rect()))
         updateLineNumberAreaWidth(0);
+}
+
+void CodeEditor::onVScrollBarChanged(int value)
+{
+    static int OFFSET = 2; // количество строк
+    int centered_line = value + verticalScrollBar()->pageStep() / 2;
+    int minDistance = -1;
+    int nearestId = -1;
+    for (const auto diff : diffBlocks_) {
+        if (diff.line < centered_line - OFFSET)
+            continue;
+
+        if (diff.line > centered_line + OFFSET)
+            break;
+
+        int dist = abs(diff.line - centered_line);
+        if (minDistance == -1 || minDistance > dist) {
+            minDistance = dist;
+            nearestId = diff.id;
+        }
+    }
+    emit sgnScrolledToBlock(nearestId);
 }
 
 void CodeEditor::paintEvent(QPaintEvent *e)
