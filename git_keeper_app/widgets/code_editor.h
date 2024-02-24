@@ -20,6 +20,7 @@ public:
 
 protected:
     void resizeEvent(QResizeEvent *event) override;
+    void paintEvent(QPaintEvent *e) override;
 
 signals:
     void sgnScrolledToBlock(int id);
@@ -34,11 +35,7 @@ private:
     QVector<DiffPos> diffBlocks_;
     int currentDiffBlockIndex_ = -1;
 
-    // QPlainTextEdit interface
-protected:
-    void paintEvent(QPaintEvent *e) override;
+    QVector<std::tuple<const DiffPos &, QRect, QBrush>> visibleBlocks_;
 
-    // QPaintDevice interface
-
-    // QPaintDevice interface
+    void recalcVisibleBlockAreas(const QRect &rect);
 };

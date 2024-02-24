@@ -128,14 +128,11 @@ void CodeEditor::onVScrollBarChanged(int value)
     emit sgnScrolledToBlock(nearestId);
 }
 
-void CodeEditor::paintEvent(QPaintEvent *e)
+void CodeEditor::recalcVisibleBlockAreas(const QRect &rect)
 {
-    QPainter painter(viewport());
-    QRect rect = e->rect();
-    painter.fillRect(rect, Qt::white);
     auto doc = document();
-
     auto offset = contentOffset().toPoint();
+    visibleBlocks_.clear();
 
     auto lineBrush = AppPalette::DiffAddedLineBrush;
     auto borderBrush = AppPalette::DiffAddedLineDarkBrush;
@@ -162,16 +159,20 @@ void CodeEditor::paintEvent(QPaintEvent *e)
             newRect.adjust(0, 2, 0, 2);
 
             if (diff.type == DiffOperationType::ADD)
-                painter.fillRect(newRect, AppPalette::DiffAddedLineBrush);
+                visibleBlocks_.append(
+                    std::make_tuple(diff, newRect, AppPalette::DiffAddedLineBrush));
 
             if (diff.type == DiffOperationType::NOTHINK)
-                painter.fillRect(newRect, AppPalette::DiffAddedLineBrush);
+                visibleBlocks_.append(
+                    std::make_tuple(diff, newRect, AppPalette::DiffAddedLineBrush));
 
             if (diff.type == DiffOperationType::REMOVE)
-                painter.fillRect(newRect, AppPalette::DiffRemovedLineBrush);
+                visibleBlocks_.append(
+                    std::make_tuple(diff, newRect, AppPalette::DiffRemovedLineBrush));
 
             if (diff.type == DiffOperationType::REPLACE)
-                painter.fillRect(newRect, AppPalette::DiffUpdatedLineBrush);
+                visibleBlocks_.append(
+                    std::make_tuple(diff, newRect, AppPalette::DiffUpdatedLineBrush));
         }
 
         if (rect.intersects(geo) == false)
@@ -196,7 +197,7 @@ void CodeEditor::paintEvent(QPaintEvent *e)
         }
 
         if (diff.count != 0) {
-            painter.fillRect(geo, lineBrush);
+            visibleBlocks_.append(std::make_tuple(diff, geo, lineBrush));
         }
 
         if (diff.id == currentDiffBlockIndex_) {
@@ -205,9 +206,22 @@ void CodeEditor::paintEvent(QPaintEvent *e)
                 geo.adjust(0, 0, 0, -1);
             }
             geo.setRight(geo.left() + 4);
-            painter.fillRect(geo, borderBrush);
+            visibleBlocks_.append(std::make_tuple(diff, geo, borderBrush));
         }
     }
+
+    return;
+}
+
+void CodeEditor::paintEvent(QPaintEvent *e)
+{
+    QPainter painter(viewport());
+    QRect rect = e->rect();
+    painter.fillRect(rect, Qt::white);
+
+    recalcVisibleBlockAreas(rect);
+    for (const auto &block : qAsConst(visibleBlocks_))
+        painter.fillRect(std::get<1>(block), std::get<2>(block));
 
     QPlainTextEdit::paintEvent(e);
 }
