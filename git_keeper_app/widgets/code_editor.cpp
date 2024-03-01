@@ -1,7 +1,8 @@
 #include "code_editor.h"
+
 #include "line_number_area.h"
 
-#include <app_palette.h>
+#include "app_palette.h"
 #include <QDebug>
 #include <QFont>
 #include <QPaintEvent>
@@ -52,6 +53,12 @@ void CodeEditor::lineNumberAreaPaintEvent(QPaintEvent *event)
         bottom = top + qRound(blockBoundingRect(block).height());
         ++blockNumber;
     }
+}
+
+void CodeEditor::setDiffMediator(DiffMediator *mediator, DiffMediator::Side side)
+{
+    diffMediatorWidget_ = mediator;
+    side_ = side;
 }
 
 int CodeEditor::lineNumberAreaWidth() const
@@ -134,6 +141,8 @@ void CodeEditor::recalcVisibleBlockAreas(const QRect &rect)
     auto offset = contentOffset().toPoint();
     visibleBlocks_.clear();
 
+    auto newRect = this->rect();
+
     auto lineBrush = AppPalette::DiffAddedLineBrush;
     auto borderBrush = AppPalette::DiffAddedLineDarkBrush;
 
@@ -147,8 +156,8 @@ void CodeEditor::recalcVisibleBlockAreas(const QRect &rect)
             for (int i = 0; i < diff.count; ++i) {
                 auto blockEnd = doc->findBlockByLineNumber(diff.line - 1 + i);
                 blockEnd = doc->findBlockByNumber(blockEnd.firstLineNumber());
-                auto geoEnd = blockBoundingGeometry(blockEnd).toRect();                
-                if (rect.intersects(geoEnd))
+                auto geoEnd = blockBoundingGeometry(blockEnd).toRect();
+                if (newRect.intersects(geoEnd))
                     geo.setBottom(geoEnd.bottom());
             }
         }
@@ -175,7 +184,7 @@ void CodeEditor::recalcVisibleBlockAreas(const QRect &rect)
                     std::make_tuple(diff, newRect, AppPalette::DiffUpdatedLineBrush));
         }
 
-        if (rect.intersects(geo) == false)
+        if (newRect.intersects(geo) == false)
             continue;
 
         if (diff.type == DiffOperationType::ADD) {
@@ -199,15 +208,13 @@ void CodeEditor::recalcVisibleBlockAreas(const QRect &rect)
         if (diff.count != 0) {
             visibleBlocks_.append(std::make_tuple(diff, geo, lineBrush));
         }
+    }
 
-        if (diff.id == currentDiffBlockIndex_) {
-            if (diff.count == 0) {
-                geo.setTop(geo.bottom() + 3);
-                geo.adjust(0, 0, 0, -1);
-            }
-            geo.setRight(geo.left() + 4);
-            visibleBlocks_.append(std::make_tuple(diff, geo, borderBrush));
-        }
+    if (diffMediatorWidget_) {
+        if (side_ == DiffMediator::Side::BEFORE)
+            diffMediatorWidget_->setBeforeBlocks(visibleBlocks_);
+        if (side_ == DiffMediator::Side::AFTER)
+            diffMediatorWidget_->setAfterBlocks(visibleBlocks_);
     }
 
     return;
@@ -220,6 +227,10 @@ void CodeEditor::paintEvent(QPaintEvent *e)
     painter.fillRect(rect, Qt::white);
 
     recalcVisibleBlockAreas(rect);
+
+    if (diffMediatorWidget_)
+        diffMediatorWidget_->update();
+
     for (const auto &block : qAsConst(visibleBlocks_))
         painter.fillRect(std::get<1>(block), std::get<2>(block));
 

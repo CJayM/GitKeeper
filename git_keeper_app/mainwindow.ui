@@ -271,15 +271,12 @@
                    </widget>
                   </item>
                   <item>
-                   <widget class="QWidget" name="diffActionsWidget" native="true">
+                   <widget class="DiffMediator" name="diffActionsWidget" native="true">
                     <property name="minimumSize">
                      <size>
-                      <width>40</width>
+                      <width>60</width>
                       <height>40</height>
                      </size>
-                    </property>
-                    <property name="autoFillBackground">
-                     <bool>false</bool>
                     </property>
                    </widget>
                   </item>
@@ -605,6 +602,12 @@
    <class>CodeEditor</class>
    <extends>QPlainTextEdit</extends>
    <header location="global">widgets/code_editor.h</header>
+  </customwidget>
+  <customwidget>
+   <class>DiffMediator</class>
+   <extends>QWidget</extends>
+   <header location="global">widgets/diff_mediator.h</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources/>

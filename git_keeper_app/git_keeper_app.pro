@@ -17,7 +17,8 @@ RC_ICONS = resources/app_icon_64.ico
 SOURCES += \
     app_palette.cpp \
     app_settings.cpp \
-    widgets/code_editor.cpp \    
+    widgets/code_editor.cpp \
+    widgets/diff_mediator.cpp \
     highlighter.cpp \
     main.cpp \
     mainwindow.cpp \
@@ -28,7 +29,8 @@ SOURCES += \
 HEADERS += \
     app_palette.h \
     app_settings.h \
-    widgets/code_editor.h \    
+    widgets/code_editor.h \
+    widgets/diff_mediator.h \
     highlighter.h \
     mainwindow.h \
     models/git_files_model.h \

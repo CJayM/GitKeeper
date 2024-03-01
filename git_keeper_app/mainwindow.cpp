@@ -81,6 +81,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
             this,
             &MainWindow::onAfterScrolledToBlock);
 
+    ui->originalFileEdit->setDiffMediator(ui->diffActionsWidget, DiffMediator::Side::BEFORE);
+    ui->currentFileEdit->setDiffMediator(ui->diffActionsWidget, DiffMediator::Side::AFTER);
+
     diffs_ = new Project(settings_.gitPath, this);
     diffs_->setPath(QDir("D:\\develop\\git_keeper\\GitKeeper"));
 
@@ -211,7 +214,6 @@ void MainWindow::onAmnedChecked(bool checked)
 
 void MainWindow::onCurrentFileVScrollBarChanged(int value)
 {
-    //    qDebug() << "Scroll B" << value;
     ui->currentFileEdit->blockSignals(true);
     auto mappedPos = diffs_->getMappedLeftPos(value);
     auto scrollBar = ui->originalFileEdit->verticalScrollBar();
@@ -221,7 +223,6 @@ void MainWindow::onCurrentFileVScrollBarChanged(int value)
 
 void MainWindow::onOriginalFileVScrollBarChanged(int value)
 {
-    //    qDebug() << "Scroll A" << value;
     ui->originalFileEdit->blockSignals(true);
     auto mappedPos = diffs_->getMappedRightPos(value);
     auto scrollBar = ui->currentFileEdit->verticalScrollBar();
@@ -231,12 +232,9 @@ void MainWindow::onOriginalFileVScrollBarChanged(int value)
 
 void MainWindow::onCurrentFileChanged(QString path)
 {
-    qDebug() << "Change current filer" << path;
     if (path != currentFilePath_) {
         currentFilePath_ = path;
         onCurrentBlockChanged(path);
-
-        qDebug() << "Color diffs";
 
         ui->originalFileEdit->clearDiffBlocks();
         ui->currentFileEdit->clearDiffBlocks();
@@ -276,7 +274,8 @@ void MainWindow::onCurrentBlockChanged(QString filePath)
     if (oper == nullptr) {
         diffs_->setBlockForFile(filePath);
         oper = diffs_->getCurrentBlock();
-        Q_ASSERT(oper != nullptr);
+        if (oper == nullptr)
+            return;
     }
 
     hightLightBlock(ui->originalFileEdit, oper->left);
@@ -292,7 +291,6 @@ void MainWindow::onCurrentFileReaded(QString filepath, QString before, QString a
 
 void MainWindow::onDiffReaded()
 {
-    qDebug() << "onDiffReaded";
     diffs_->moveNextChange();
 }
 
