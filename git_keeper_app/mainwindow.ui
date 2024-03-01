@@ -247,6 +247,9 @@
                     <property name="enabled">
                      <bool>true</bool>
                     </property>
+                    <property name="verticalScrollBarPolicy">
+                     <enum>Qt::ScrollBarAlwaysOff</enum>
+                    </property>
                     <property name="documentTitle">
                      <string notr="true"/>
                     </property>
