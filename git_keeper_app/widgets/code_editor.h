@@ -18,7 +18,7 @@ public:
 
     void clearDiffBlocks();
     void addDiffBlock(DiffPos block);
-    void setCurrentBlock(const DiffPos &diff);
+    void setCurrentBlockId(int id);
 
 protected:
     void resizeEvent(QResizeEvent *event) override;
@@ -41,5 +41,5 @@ private:
 
     QVector<std::tuple<const DiffPos, QRect, QBrush>> visibleBlocks_;
 
-    void recalcVisibleBlockAreas(const QRect &rect);
+    void recalcVisibleBlockAreas();
 };

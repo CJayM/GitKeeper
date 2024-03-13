@@ -18,12 +18,13 @@ CodeEditor::CodeEditor(QWidget *parent) : QPlainTextEdit(parent)
     lineNumberArea_ = new LineNumberArea(this);
 
     connect(this, &CodeEditor::blockCountChanged, this, &CodeEditor::updateLineNumberAreaWidth);
-    connect(this, &CodeEditor::updateRequest, this, &CodeEditor::updateLineNumberArea);
+    connect(this, &CodeEditor::updateRequest, this, &CodeEditor::updateLineNumberArea);    
 
     connect(verticalScrollBar(), &QScrollBar::valueChanged, this, &CodeEditor::onVScrollBarChanged);
     setCenterOnScroll(true);
 
     updateLineNumberAreaWidth(0);
+    recalcVisibleBlockAreas();
 }
 
 void CodeEditor::lineNumberAreaPaintEvent(QPaintEvent *event)
@@ -59,6 +60,7 @@ void CodeEditor::setDiffMediator(DiffMediator *mediator, DiffMediator::Side side
 {
     diffMediatorWidget_ = mediator;
     side_ = side;
+    viewport()->repaint();
 }
 
 int CodeEditor::lineNumberAreaWidth() const
@@ -78,16 +80,19 @@ void CodeEditor::clearDiffBlocks()
 {
     diffBlocks_.clear();
     currentDiffBlockIndex_ = -1;
+    recalcVisibleBlockAreas();
 }
 
 void CodeEditor::addDiffBlock(DiffPos block)
 {
     diffBlocks_ << block;
+    recalcVisibleBlockAreas();
 }
 
-void CodeEditor::setCurrentBlock(const DiffPos &diff)
+void CodeEditor::setCurrentBlockId(int id)
 {
-    currentDiffBlockIndex_ = diff.id;
+    currentDiffBlockIndex_ = id;
+    recalcVisibleBlockAreas();
 }
 
 void CodeEditor::resizeEvent(QResizeEvent *event)
@@ -96,6 +101,7 @@ void CodeEditor::resizeEvent(QResizeEvent *event)
 
     QRect cr = contentsRect();
     lineNumberArea_->setGeometry(QRect(cr.left(), cr.top(), lineNumberAreaWidth(), cr.height()));
+    recalcVisibleBlockAreas();
 }
 void CodeEditor::updateLineNumberAreaWidth(int newBlockCount)
 {
@@ -133,9 +139,11 @@ void CodeEditor::onVScrollBarChanged(int value)
         }
     }
     emit sgnScrolledToBlock(nearestId);
+
+    recalcVisibleBlockAreas();
 }
 
-void CodeEditor::recalcVisibleBlockAreas(const QRect &rect)
+void CodeEditor::recalcVisibleBlockAreas()
 {
     auto doc = document();
     auto offset = contentOffset().toPoint();
@@ -217,22 +225,37 @@ void CodeEditor::recalcVisibleBlockAreas(const QRect &rect)
             diffMediatorWidget_->setAfterBlocks(visibleBlocks_);
     }
 
+    viewport()->repaint();
     return;
 }
 
 void CodeEditor::paintEvent(QPaintEvent *e)
-{
+{    
     QPainter painter(viewport());
     QRect rect = e->rect();
     painter.fillRect(rect, Qt::white);
 
-    recalcVisibleBlockAreas(rect);
-
     if (diffMediatorWidget_)
         diffMediatorWidget_->update();
 
-    for (const auto &block : qAsConst(visibleBlocks_))
-        painter.fillRect(std::get<1>(block), std::get<2>(block));
+    for (const auto &block : qAsConst(visibleBlocks_)) {
+        auto diff = std::get<0>(block);
+        auto currentRect = std::get<1>(block);
+
+        auto fillColor = std::get<2>(block);
+
+        painter.fillRect(currentRect, fillColor);
+
+        if (currentDiffBlockIndex_ != -1) {
+            if (currentDiffBlockIndex_ == diff.id) {
+                fillColor = fillColor.color().darker(120);
+                painter.setPen(fillColor.color());
+
+                painter.drawLine(currentRect.topLeft(), currentRect.topRight());
+                painter.drawLine(currentRect.bottomLeft(), currentRect.bottomRight());
+            }
+        }
+    }
 
     QPlainTextEdit::paintEvent(e);
 }

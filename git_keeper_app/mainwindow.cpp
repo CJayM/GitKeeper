@@ -233,11 +233,12 @@ void MainWindow::onOriginalFileVScrollBarChanged(int value)
 void MainWindow::onCurrentFileChanged(QString path)
 {
     if (path != currentFilePath_) {
-        currentFilePath_ = path;
-        onCurrentBlockChanged(path);
+        currentFilePath_ = path;        
 
         ui->originalFileEdit->clearDiffBlocks();
         ui->currentFileEdit->clearDiffBlocks();
+
+        onCurrentBlockChanged(path);
 
         const auto diffs = diffs_->getCurrentFileDiffs();
 
@@ -331,37 +332,14 @@ void hightLightBlock(CodeEditor *widget, const DiffPos &diff)
 {
     const auto &document = widget->document();
     auto block = document->findBlockByLineNumber(diff.line - 1);
+
     if (block.isValid() == false)
         return;
 
-    widget->setCurrentBlock(diff);
+    widget->setCurrentBlockId(diff.id);
     widget->setTextCursor(QTextCursor(block));
     if (diff.count == 0)
         return;
 
-    //    onOriginalFileVScrollBarChanged(oper->right.line - 1);
-    auto end = document->findBlockByLineNumber(diff.line - 1 + diff.count - 1);
-
-    QList<QTextEdit::ExtraSelection> extraSelections;
-    auto pos = block.position();
-    QTextEdit::ExtraSelection selection;
-    selection.cursor = QTextCursor(document);
-    selection.cursor.setPosition(pos);
-    auto endPos = end.position() + end.length() - 1;
-    selection.cursor.setPosition(endPos, QTextCursor::KeepAnchor);
-
-    if (diff.type == DiffOperationType::ADD)
-        selection.format.setBackground(AppPalette::DiffAddedLineExtraSelectionBrush);
-
-    if (diff.type == DiffOperationType::REMOVE)
-        selection.format.setBackground(AppPalette::DiffRemovedLineExtraSelectionBrush);
-
-    if (diff.type == DiffOperationType::REPLACE)
-        selection.format.setBackground(AppPalette::DiffUpdatedLineExtraSelectionBrush);
-
-    if (diff.type == DiffOperationType::NOTHINK)
-        selection.format.setBackground(AppPalette::DiffNothinkLineExtraSelectionBrush);
-
-    extraSelections.append(selection);
-    widget->setExtraSelections(extraSelections);
+    return;
 }
