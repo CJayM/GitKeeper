@@ -58,7 +58,7 @@ public:
   void onCurrentBlockChanged(QString filePath);
   void onHasPrevBlockChanged(bool hasPrev);
   void onHasNextBlockChanged(bool hasNext);
-  void onAfterScrolledToBlock(int id);
+  void onCurrentBlickChanged(int id);
 
   private:
   Ui::MainWindow *ui;

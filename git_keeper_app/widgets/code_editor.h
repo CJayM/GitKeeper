@@ -25,7 +25,7 @@ protected:
     void paintEvent(QPaintEvent *e) override;
 
 signals:
-    void sgnScrolledToBlock(int id);
+    void sgnCurrentBlockChanged(int id);
 
 private slots:
     void updateLineNumberAreaWidth(int newBlockCount);
@@ -42,4 +42,8 @@ private:
     QVector<std::tuple<const DiffPos, QRect, QBrush>> visibleBlocks_;
 
     void recalcVisibleBlockAreas();
+
+    // QWidget interface
+protected:
+    void mousePressEvent(QMouseEvent *event);
 };

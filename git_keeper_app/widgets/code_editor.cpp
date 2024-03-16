@@ -14,14 +14,14 @@ CodeEditor::CodeEditor(QWidget *parent) : QPlainTextEdit(parent)
 {
     QFont font("Arial", 13);
     setFont(font);
+    setCenterOnScroll(true);
 
     lineNumberArea_ = new LineNumberArea(this);
 
     connect(this, &CodeEditor::blockCountChanged, this, &CodeEditor::updateLineNumberAreaWidth);
-    connect(this, &CodeEditor::updateRequest, this, &CodeEditor::updateLineNumberArea);    
+    connect(this, &CodeEditor::updateRequest, this, &CodeEditor::updateLineNumberArea);
 
     connect(verticalScrollBar(), &QScrollBar::valueChanged, this, &CodeEditor::onVScrollBarChanged);
-    setCenterOnScroll(true);
 
     updateLineNumberAreaWidth(0);
     recalcVisibleBlockAreas();
@@ -138,9 +138,8 @@ void CodeEditor::onVScrollBarChanged(int value)
             nearestId = diff.id;
         }
     }
-    emit sgnScrolledToBlock(nearestId);
-
-    recalcVisibleBlockAreas();
+    setCurrentBlockId(nearestId);
+    emit sgnCurrentBlockChanged(nearestId);
 }
 
 void CodeEditor::recalcVisibleBlockAreas()
@@ -154,7 +153,7 @@ void CodeEditor::recalcVisibleBlockAreas()
     auto lineBrush = AppPalette::DiffAddedLineBrush;
     auto borderBrush = AppPalette::DiffAddedLineDarkBrush;
 
-    for (const auto &diff : qAsConst(diffBlocks_)) {
+    for (const auto &diff : qAsConst(diffBlocks_)) {        
         auto block = doc->findBlockByLineNumber(diff.line - 1);
         block = doc->findBlockByNumber(block.firstLineNumber());
         auto geo = blockBoundingGeometry(block).toRect();
@@ -227,6 +226,34 @@ void CodeEditor::recalcVisibleBlockAreas()
 
     viewport()->repaint();
     return;
+}
+
+void CodeEditor::mousePressEvent(QMouseEvent *event)
+{
+    auto doc = document();
+    auto curs = cursorForPosition(event->pos());
+    auto block = doc->findBlock(curs.position());
+
+    int line = block.firstLineNumber() + 1;
+
+    for (const auto &diff : qAsConst(diffBlocks_)) {
+        int from = diff.line;
+        int to = from + diff.count;
+        if (to < from)
+            continue;
+        if (from > line)
+            break;
+
+        if ((line >= from) && (line <= to)) {
+            if (currentDiffBlockIndex_ != diff.id) {
+                setCurrentBlockId(diff.id);
+                emit sgnCurrentBlockChanged(diff.id);
+                return;
+            }
+        }
+    }
+
+    QPlainTextEdit::mousePressEvent(event);
 }
 
 void CodeEditor::paintEvent(QPaintEvent *e)

@@ -77,9 +77,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
             this,
             &MainWindow::onOriginalFileVScrollBarChanged);
     connect(ui->currentFileEdit,
-            &CodeEditor::sgnScrolledToBlock,
+            &CodeEditor::sgnCurrentBlockChanged,
             this,
-            &MainWindow::onAfterScrolledToBlock);
+            &MainWindow::onCurrentBlickChanged);
 
     ui->originalFileEdit->setDiffMediator(ui->diffActionsWidget, DiffMediator::Side::BEFORE);
     ui->currentFileEdit->setDiffMediator(ui->diffActionsWidget, DiffMediator::Side::AFTER);
@@ -305,7 +305,7 @@ void MainWindow::onHasNextBlockChanged(bool hasNext)
     ui->nextBlockChangeAction->setEnabled(hasNext);
 }
 
-void MainWindow::onAfterScrolledToBlock(int id)
+void MainWindow::onCurrentBlickChanged(int id)
 {
     for (const auto &diff : diffs_->getCurrentFileDiffs()) {
         if (diff->right.id < id)
