@@ -3,6 +3,7 @@
 #include "diff.h"
 #include "diff_mediator.h"
 
+#include <QAction>
 #include <QPlainTextEdit>
 #include <QWidget>
 
@@ -20,6 +21,12 @@ public:
     void addDiffBlock(DiffPos block);
     void setCurrentBlockId(int id);
 
+    QAction stageFile;
+    QAction revertFile;
+    QAction stageHunk;
+    QAction revertHunk;
+    QAction editFile;
+
 protected:
     void resizeEvent(QResizeEvent *event) override;
     void paintEvent(QPaintEvent *e) override;
@@ -31,6 +38,7 @@ private slots:
     void updateLineNumberAreaWidth(int newBlockCount);
     void updateLineNumberArea(const QRect &rect, int dy);
     void onVScrollBarChanged(int value);
+    void onContextMenu(const QPoint &pos);
 
 private:
     QWidget *lineNumberArea_ = nullptr;
@@ -42,6 +50,8 @@ private:
     QVector<std::tuple<const DiffPos, QRect, QBrush>> visibleBlocks_;
 
     void recalcVisibleBlockAreas();
+    int getLineFromPos(const QPoint &pos) const;
+    int getDiffIdAtLine(int line) const;
 
     // QWidget interface
 protected:

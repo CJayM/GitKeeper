@@ -5,6 +5,7 @@
 #include "app_palette.h"
 #include <QDebug>
 #include <QFont>
+#include <QMenu>
 #include <QPaintEvent>
 #include <QPainter>
 #include <QScrollBar>
@@ -15,11 +16,19 @@ CodeEditor::CodeEditor(QWidget *parent) : QPlainTextEdit(parent)
     QFont font("Arial", 13);
     setFont(font);
     setCenterOnScroll(true);
+    setContextMenuPolicy(Qt::ContextMenuPolicy::CustomContextMenu);
+
+    stageFile.setText("Фиксировать файл");
+    revertFile.setText("Вернуть файл");
+    stageHunk.setText("Фиксировать фрагмент");
+    revertHunk.setText("Вернуть фрагмент");
+    editFile.setText("Редактировать");
 
     lineNumberArea_ = new LineNumberArea(this);
 
     connect(this, &CodeEditor::blockCountChanged, this, &CodeEditor::updateLineNumberAreaWidth);
     connect(this, &CodeEditor::updateRequest, this, &CodeEditor::updateLineNumberArea);
+    connect(this, &CodeEditor::customContextMenuRequested, this, &CodeEditor::onContextMenu);
 
     connect(verticalScrollBar(), &QScrollBar::valueChanged, this, &CodeEditor::onVScrollBarChanged);
 
@@ -142,6 +151,28 @@ void CodeEditor::onVScrollBarChanged(int value)
     emit sgnCurrentBlockChanged(nearestId);
 }
 
+void CodeEditor::onContextMenu(const QPoint &pos)
+{
+    QMenu menu;
+
+    int line = getLineFromPos(pos);
+    int diffId = getDiffIdAtLine(line);
+    if (diffId != -1) {
+        menu.addAction(&stageHunk);
+        stageHunk.setData(diffId);
+
+        menu.addAction(&revertHunk);
+        revertHunk.setData(diffId);
+    }
+    menu.addSeparator();
+    menu.addAction(&stageFile);
+    menu.addAction(&revertFile);
+    menu.addSeparator();
+    menu.addAction(&editFile);
+
+    menu.exec(mapToGlobal(pos));
+}
+
 void CodeEditor::recalcVisibleBlockAreas()
 {
     auto doc = document();
@@ -228,14 +259,17 @@ void CodeEditor::recalcVisibleBlockAreas()
     return;
 }
 
-void CodeEditor::mousePressEvent(QMouseEvent *event)
+int CodeEditor::getLineFromPos(const QPoint &pos) const
 {
     auto doc = document();
-    auto curs = cursorForPosition(event->pos());
+    auto curs = cursorForPosition(pos);
     auto block = doc->findBlock(curs.position());
 
-    int line = block.firstLineNumber() + 1;
+    return block.firstLineNumber() + 1;
+}
 
+int CodeEditor::getDiffIdAtLine(int line) const
+{
     for (const auto &diff : qAsConst(diffBlocks_)) {
         int from = diff.line;
         int to = from + diff.count;
@@ -244,12 +278,22 @@ void CodeEditor::mousePressEvent(QMouseEvent *event)
         if (from > line)
             break;
 
-        if ((line >= from) && (line <= to)) {
-            if (currentDiffBlockIndex_ != diff.id) {
-                setCurrentBlockId(diff.id);
-                emit sgnCurrentBlockChanged(diff.id);
-                return;
-            }
+        if ((line >= from) && (line <= to))
+            return diff.id;
+    }
+
+    return -1;
+}
+
+void CodeEditor::mousePressEvent(QMouseEvent *event)
+{
+    int line = getLineFromPos(event->pos());
+    int diffId = getDiffIdAtLine(line);
+    if (diffId != -1) {
+        if (currentDiffBlockIndex_ != diffId) {
+            setCurrentBlockId(diffId);
+            emit sgnCurrentBlockChanged(diffId);
+            return;
         }
     }
 
@@ -270,18 +314,24 @@ void CodeEditor::paintEvent(QPaintEvent *e)
         auto currentRect = std::get<1>(block);
 
         auto fillColor = std::get<2>(block);
-
-        painter.fillRect(currentRect, fillColor);
+        auto color = fillColor.color();
 
         if (currentDiffBlockIndex_ != -1) {
             if (currentDiffBlockIndex_ == diff.id) {
-                fillColor = fillColor.color().darker(120);
-                painter.setPen(fillColor.color());
+                auto borderColor = QColor::fromHsv(color.hsvHue(),
+                                                   color.hsvSaturation() - 10,
+                                                   color.value());
+                painter.setPen(QPen(borderColor, 3));
+                fillColor = QColor::fromHsv(color.hsvHue(),
+                                            color.hsvSaturation() + 40,
+                                            color.value());
 
                 painter.drawLine(currentRect.topLeft(), currentRect.topRight());
                 painter.drawLine(currentRect.bottomLeft(), currentRect.bottomRight());
             }
         }
+
+        painter.fillRect(currentRect, fillColor);
     }
 
     QPlainTextEdit::paintEvent(e);
