@@ -83,3 +83,11 @@ QStringList Git::makeShowDiffCommand(QString filepath) const
 
     return result;
 }
+
+QStringList Git::makeAddCommand(const QStringList pathes) const
+{
+    QStringList result;
+    result << "add" << pathes.join(" ");
+
+    return result;
+}

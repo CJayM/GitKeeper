@@ -30,9 +30,11 @@ public:
     void clearCurrentBlockIndex();
     void selectCurrentFile(QString filepath);
 
+    // git commands
     void status();
-    void commit(QString message, bool isAmned);
+    void commit(const QString message, bool isAmned);
     void queryLastCommitMessage();
+    void stageFile(const QStringList pathes);
 
 signals:
     void sgnFilesChanged(QVector<GitFile> files);
@@ -54,6 +56,7 @@ private slots:
     void onReceivedLastMessage(QString data);
     void onCurrentFileReaded(QString filepath, QString before, QString after);
     void onDiffsReaded(QStringList data);
+    void onGitAddFinished(const QStringList pathes);
 
 private:
     QString currentFile_;
@@ -62,6 +65,6 @@ private:
 
     QVector<GitFile> changedFiles_;                       // result of "status" command
     QHash<QString, QVector<DiffOperation *>> operations_; // result of "diff" command
-    QList<DiffOperation *> operationsList_;
+    QVector<DiffOperation *> operationsList_;
     int currentOperationIndex_ = -1;
 };

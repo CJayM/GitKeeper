@@ -21,9 +21,10 @@ public:
     void setWorkingDir(const QDir &dir);
 
     void status();
-    void commit(QString message, bool isAmend);
+    void commit(const QString message, bool isAmend);
     void requestLastCommitMessage();
     void queryFile(QString filepath);
+    void add(const QStringList pathes);
 
     void setGitPath(const QString &path);
 
@@ -31,8 +32,9 @@ signals:
     void sgnSended(QString data);
     void sgnReceived(QString data, bool isError);
 
-    void sgnResultReceived(QVector<GitFile> result);
+    void sgnGitStatus(QVector<GitFile> result);
     void sgnFinished();
+    void sgnGitAddFinished(const QStringList pathes);
     void sgnLastMessageReady(QString msg);
     void sgnCurrentFuleContentReaded(QString filepath, QString before, QString after);
     void sgnDiffsReaded(QStringList data);

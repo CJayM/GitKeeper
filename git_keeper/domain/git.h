@@ -16,6 +16,7 @@ public:
     QStringList makeLastCommitMessageCommand() const;
     QStringList makeShowCommand(QString filepath) const;
     QStringList makeShowDiffCommand(QString filepath = "") const;
+    QStringList makeAddCommand(const QStringList pathes) const;
 
 signals:
 

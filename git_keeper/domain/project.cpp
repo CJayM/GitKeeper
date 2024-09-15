@@ -5,9 +5,10 @@ Project::Project(QString gitPath, QObject *parent) : QObject(parent), gitPath_(g
 {
     gitRepository_ = new GitRepository(gitPath_, this);
 
-    connect(gitRepository_, &GitRepository::sgnResultReceived, this, &Project::onGitStatusFinished);
+    connect(gitRepository_, &GitRepository::sgnGitStatus, this, &Project::onGitStatusFinished);
     connect(gitRepository_, &GitRepository::sgnSended, this, &Project::onSendedToGit);
     connect(gitRepository_, &GitRepository::sgnReceived, this, &Project::onReceivedFromGit);
+    connect(gitRepository_, &GitRepository::sgnGitAddFinished, this, &Project::onGitAddFinished);
     connect(gitRepository_,
             &GitRepository::sgnLastMessageReady,
             this,
@@ -218,7 +219,7 @@ void Project::status()
     gitRepository_->status();
 }
 
-void Project::commit(QString message, bool isAmned)
+void Project::commit(const QString message, bool isAmned)
 {
     gitRepository_->commit(message, isAmned);
 }
@@ -226,6 +227,11 @@ void Project::commit(QString message, bool isAmned)
 void Project::queryLastCommitMessage()
 {
     gitRepository_->requestLastCommitMessage();
+}
+
+void Project::stageFile(const QStringList pathes)
+{
+    gitRepository_->add(pathes);
 }
 
 void Project::onGitStatusFinished(QVector<GitFile> result)
@@ -294,4 +300,45 @@ void Project::onDiffsReaded(QStringList data)
     }
 
     emit sgnDiffsReloaded();
+}
+
+void Project::onGitAddFinished(const QStringList pathes)
+{
+    auto oldCurrentFileIndex = operations_.keys().indexOf(currentFile_);
+    auto currentFileIndex = oldCurrentFileIndex;
+
+    // find new currentOperationIndex values
+    int dec = 0;
+    for (int i = 0; i < operationsList_.size(); ++i) {
+        const auto &item = operationsList_[i];
+        if (pathes.contains(item->filePath))
+            ++dec;
+
+        if (i == currentFileIndex) {
+            currentFileIndex = currentFileIndex - dec;
+            break;
+        }
+    }
+
+    // erase from hash
+    for (const auto &path : pathes) {
+        if (operations_.contains(path))
+            operations_.remove(path);
+    }
+
+    // erase added files
+    auto newEnd = std::remove_if(operationsList_.begin(),
+                                 operationsList_.end(),
+                                 [&pathes](const DiffOperation *item) {
+                                     return pathes.contains(item->filePath);
+                                 });
+    operationsList_.erase(newEnd, operationsList_.end());
+
+    // check out of range
+    if (currentFileIndex >= operations_.size()) {
+        currentFileIndex = operations_.size() - 1;
+    }
+
+    if (currentFileIndex != oldCurrentFileIndex)
+        selectCurrentFile(operations_.keys().at(currentFileIndex));
 }

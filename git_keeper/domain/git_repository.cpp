@@ -60,7 +60,7 @@ void GitRepository::status()
         emit sgnReceived(text, false);
 
         auto files = proccessGitStatus(text);
-        emit sgnResultReceived(files);
+        emit sgnGitStatus(files);
 
         params = git_->makeShowDiffCommand();
         auto diffFuture = QtConcurrent::run(git_,
@@ -83,7 +83,7 @@ void GitRepository::status()
     });
 }
 
-void GitRepository::commit(QString message, bool isAmend)
+void GitRepository::commit(const QString message, bool isAmend)
 {
     if (watcher_)
         watcher_->cancel();
@@ -181,6 +181,25 @@ void GitRepository::queryFile(QString filepath)
                                              future2.result().second);            
         },
         filepath);
+}
+
+void GitRepository::add(const QStringList pathes)
+{
+    auto params = git_->makeAddCommand(pathes);
+    auto statusFuture = QtConcurrent::run(git_,
+                                          &Git::execute,
+                                          getWorkingDir().absolutePath(),
+                                          gitPath_,
+                                          params);
+    emit sgnSended(QString("%1 %2").arg(gitPath_).arg(params.join(" ")));
+    statusFuture.waitForFinished();
+
+    auto text = statusFuture.result().result.join("\n");
+    qDebug() << "ADD FINISHED";
+    qDebug() << text;
+    emit sgnReceived(text, false);
+
+    emit sgnGitAddFinished(pathes);
 }
 
 void GitRepository::setGitPath(const QString &path)
