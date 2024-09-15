@@ -87,15 +87,15 @@ Highlighter::Highlighter(QTextDocument *parent)
 //! [2]
 
 //! [3]
-    singleLineCommentFormat.setForeground(Qt::red);
+    singleLineCommentFormat.setForeground(Qt::gray);
     rule.pattern = QRegularExpression(QStringLiteral("//[^\n]*"));
     rule.format = singleLineCommentFormat;
     highlightingRules.append(rule);
 
-    multiLineCommentFormat.setForeground(Qt::red);
-//! [3]
+    multiLineCommentFormat.setForeground(Qt::gray);
+    //! [3]
 
-//! [4]
+    //! [4]
     quotationFormat.setForeground(Qt::darkGreen);
     rule.pattern = QRegularExpression(QStringLiteral("\".*\""));
     rule.format = quotationFormat;

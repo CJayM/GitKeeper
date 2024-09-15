@@ -14,6 +14,7 @@
 #include <QScrollBar>
 #include <QSettings>
 #include <QSplashScreen>
+#include <QStringList>
 #include <QTableView>
 
 #include "domain/git_repository.h"
@@ -80,6 +81,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
             &CodeEditor::sgnCurrentBlockChanged,
             this,
             &MainWindow::onCurrentBlickChanged);
+    connect(&ui->currentFileEdit->stageFile,
+            &QAction::triggered,
+            this,
+            &MainWindow::onStageFileAction);
 
     ui->originalFileEdit->setDiffMediator(ui->diffActionsWidget, DiffMediator::Side::BEFORE);
     ui->currentFileEdit->setDiffMediator(ui->diffActionsWidget, DiffMediator::Side::AFTER);
@@ -315,6 +320,13 @@ void MainWindow::onCurrentBlickChanged(int id)
 
         diffs_->setCurrentBlock(id);
     }
+}
+
+void MainWindow::onStageFileAction(bool checked)
+{
+    diffs_->stageFile(QStringList{
+        currentFilePath_,
+    });
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)

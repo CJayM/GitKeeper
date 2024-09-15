@@ -60,6 +60,9 @@ public:
   void onHasNextBlockChanged(bool hasNext);
   void onCurrentBlickChanged(int id);
 
+  // actions
+  void onStageFileAction(bool checked);
+
   private:
   Ui::MainWindow *ui;
 
